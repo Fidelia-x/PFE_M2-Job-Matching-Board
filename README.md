@@ -1,1 +1,1 @@
-# Projet-de-fin-d-etude-Job-Intelligence-Board
+# Projet de fin d'etude: Job Intelligence Board
