@@ -37,6 +37,19 @@ services:
     volumes:
       - minio_data:/data
   
+  create-buckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 10;
+      /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_USER} ${MINIO_PASSWORD};
+      /usr/bin/mc mb myminio/bronze;
+      /usr/bin/mc mb myminio/silver;
+      /usr/bin/mc mb myminio/gold;
+      "
+  
   airflow-webserver:
     image: apache/airflow:2.8.0
     container_name: job_airflow-webserver
@@ -54,8 +67,8 @@ services:
       - "8080:8080"
     command: webserver
     volumes:
-      - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
   
   airflow-scheduler:
     image: apache/airflow:2.8.0
@@ -69,8 +82,8 @@ services:
       - airflow-webserver
     command: scheduler
     volumes:
-      - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
       
   fastapi:
     build:
