@@ -1,0 +1,11 @@
+# Fichiers et dossiers à ignorer par Docker
+.git
+.env
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+airflow/logs/
+airflow/dags/
+scripts/

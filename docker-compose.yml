@@ -51,6 +51,8 @@ services:
       "
   
   airflow-webserver:
+    build:
+      context: .
     image: apache/airflow:2.8.0
     container_name: job_airflow-webserver
     environment:
@@ -61,6 +63,11 @@ services:
       - _AIRFLOW_WWW_USER_CREATE=true   # crée l'admin automatiquement
       - _AIRFLOW_WWW_USER_USERNAME=admin
       - _AIRFLOW_WWW_USER_PASSWORD=admin
+      - AIRFLOW_VAR_CLIENT_ID=${CLIENT_ID}
+      - AIRFLOW_VAR_CLIENT_SECRET=${CLIENT_SECRET}
+      - MINIO_HOST=job_minio:9000 
+      - MINIO_USER=${MINIO_USER}
+      - MINIO_PASSWORD=${MINIO_PASSWORD}
     depends_on:
       - postgres
     ports:
@@ -69,6 +76,7 @@ services:
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
+      - ./scripts:/opt/airflow/scripts
   
   airflow-scheduler:
     image: apache/airflow:2.8.0
@@ -77,6 +85,9 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
       - AIRFLOW__LOGGING__LOGGING_LEVEL=INFO
+      - MINIO_HOST=job_minio:9000
+      - MINIO_USER=${MINIO_USER}
+      - MINIO_PASSWORD=${MINIO_PASSWORD}
     depends_on:
       - postgres
       - airflow-webserver
@@ -84,6 +95,7 @@ services:
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
+      - ./scripts:/opt/airflow/scripts
       
   fastapi:
     build:
@@ -97,7 +109,7 @@ services:
 
   # streamlit:
   #   build:
-  #     context: ./backend
+  #     context: .
   #     dockerfile: streamlit/Dockerfile
   #   container_name: job_streamlit
   #   ports:
