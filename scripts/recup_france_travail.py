@@ -1,11 +1,3 @@
-#code 1
-# identifiant client: PAR_jobmatching_0079a623d606e91e9dd17dd8c6ebdc3a3cf6ba0a4dd308c99a920b872339732e
-# cle secrete: c7b10462ffffb3ba58d73cc7386716988370e7c6652b6c307ccce76ab85eb89d
-
-#code 2
-# identifiant client:PAR_jobmatching_ca23ea217d4adb9ecf93e3e6553e9971a37ae7d9109fce006e6937246246395c
-# cle secrete:3fbdcd7be2387dc8aba83f0d899438c0d61d3794a4f140d34e2b47acb8d49640
-
 import os
 import json
 import requests
