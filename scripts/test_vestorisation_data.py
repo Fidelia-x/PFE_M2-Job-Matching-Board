@@ -5,7 +5,6 @@ import psycopg2
 model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
 # 2. Connexion (utilise tes variables d'environnement ici)
-# conn = psycopg2.connect(dbname="ta_base", user="ton_user", password="ton_password")
 conn = psycopg2.connect(dbname="job_matching", user="user", password="password")
 cur = conn.cursor()
 
