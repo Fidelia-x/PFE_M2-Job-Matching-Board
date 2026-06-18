@@ -1,5 +1,4 @@
 import psycopg2
-from sentence_transformers import SentenceTransformer
 from psycopg2.extras import execute_values
 
 conn_params = "dbname=job_matching host=postgres user=user password=password"
@@ -7,6 +6,7 @@ conn_params = "dbname=job_matching host=postgres user=user password=password"
 def vectorize_missing_offers():
     conn = psycopg2.connect(conn_params)
     cur = conn.cursor()
+    from sentence_transformers import SentenceTransformer
     model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
     
     # On ne récupère que les offres qui n'ont pas encore d'embedding

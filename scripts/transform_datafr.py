@@ -27,33 +27,86 @@ def extract_salary(salary_data):
         return numbers[0], numbers[0]
     return 0.0, 0.0
 
+# def transformer_data(json_data):
+#     df = pd.DataFrame(json_data.get('offres', []))
+#     df_clean = pd.DataFrame()
+
+#     # Mapping complet
+#     df_clean['id_france_travail'] = df['id']
+#     df_clean['titre'] = df['intitule']
+#     df_clean['description'] = df['description']
+#     # Gestion des tableaux (ARRAY dans Postgres)
+#     df_clean['competences'] = df['competences'].apply(lambda x: [item['libelle'] for item in x] if isinstance(x, list) else [])
+#     df_clean['languages'] = df['langues'].apply(lambda x: [item['libelle'] for item in x] if isinstance(x, list) else [])
+    
+#     df_clean['contract'] = df['typeContratLibelle']
+#     df_clean['diplome_requis'] = df['qualificationLibelle']
+#     df_clean['education'] = df['formations'].apply(lambda x: x[0].get('niveauLibelle') if isinstance(x, list) and len(x) > 0 else None)
+#     df_clean['localisation'] = df['lieuTravail'].apply(lambda x: x.get('libelle') if isinstance(x, dict) else None)
+    
+#     # Salaires
+#     salaires = df['salaire'].apply(extract_salary)
+#     df_clean['salaire_min'] = [s[0] for s in salaires]
+#     df_clean['salaire_max'] = [s[1] for s in salaires]
+    
+#     df_clean['experience_years'] = df['experienceExige'].map({'D': 0, 'E': 3}).fillna(1)
+#     df_clean['source_url'] = df['origineOffre'].apply(lambda x: x.get('urlOrigine') if isinstance(x, dict) else None)
+#     df_clean['source_platform'] = 'France Travail'
+#     df_clean['company'] = df['entreprise'].apply(lambda x: x.get('nom', 'N/A') if isinstance(x, dict) else 'N/A')
+#     df_clean['date_du_poste'] = pd.to_datetime(df['dateCreation'])
+    
+#     return df_clean
+
 def transformer_data(json_data):
-    df = pd.DataFrame(json_data.get('offres', []))
+    # On récupère la liste des offres
+    offres = json_data.get('offres', [])
+    df = pd.DataFrame(offres)
+    
+    # Création d'un dataframe vide pour éviter les erreurs de construction
     df_clean = pd.DataFrame()
     
-    # Mapping complet
-    df_clean['id_france_travail'] = df['id']
-    df_clean['titre'] = df['intitule']
-    df_clean['description'] = df['description']
-    # Gestion des tableaux (ARRAY dans Postgres)
-    df_clean['competences'] = df['competences'].apply(lambda x: [item['libelle'] for item in x] if isinstance(x, list) else [])
-    df_clean['languages'] = df['langues'].apply(lambda x: [item['libelle'] for item in x] if isinstance(x, list) else [])
+    # Utilisation de .get() pour éviter les erreurs si la colonne est absente
+    # On définit une fonction utilitaire pour extraire en toute sécurité
+    def get_col(col_name, default=None):
+        return df[col_name] if col_name in df.columns else pd.Series([default] * len(df))
+
+    # Mapping sécurisé
+    df_clean['id_france_travail'] = get_col('id')
+    df_clean['titre'] = get_col('intitule', 'N/A')
+    df_clean['description'] = get_col('description', '')
     
-    df_clean['contract'] = df['typeContratLibelle']
-    df_clean['diplome_requis'] = df['qualificationLibelle']
-    df_clean['education'] = df['formations'].apply(lambda x: x[0].get('niveauLibelle') if isinstance(x, list) and len(x) > 0 else None)
-    df_clean['localisation'] = df['lieuTravail'].apply(lambda x: x.get('libelle') if isinstance(x, dict) else None)
+    # Gestion des tableaux avec vérification de l'existence de la colonne
+    if 'competences' in df.columns:
+        df_clean['competences'] = df['competences'].apply(lambda x: [item['libelle'] for item in x] if isinstance(x, list) else [])
+    else:
+        df_clean['competences'] = [[] for _ in range(len(df))]
+
+    if 'langues' in df.columns:
+        df_clean['languages'] = df['langues'].apply(lambda x: [item['libelle'] for item in x] if isinstance(x, list) else [])
+    else:
+        df_clean['languages'] = [[] for _ in range(len(df))]
     
-    # Salaires
-    salaires = df['salaire'].apply(extract_salary)
+    # Autres colonnes
+    df_clean['contract'] = get_col('typeContratLibelle', 'Non précisé')
+    df_clean['diplome_requis'] = get_col('qualificationLibelle', 'Non précisé')
+    
+    # Gestion de l'éducation (nested)
+    df_clean['education'] = df['formations'].apply(lambda x: x[0].get('niveauLibelle') if isinstance(x, list) and len(x) > 0 else None) if 'formations' in df.columns else None
+    
+    df_clean['localisation'] = df['lieuTravail'].apply(lambda x: x.get('libelle') if isinstance(x, dict) else None) if 'lieuTravail' in df.columns else None
+    
+    # Salaires (utilisation de get() pour éviter le KeyError sur 'salaire')
+    salaire_series = df.get('salaire', pd.Series([None] * len(df)))
+    salaires = salaire_series.apply(extract_salary)
     df_clean['salaire_min'] = [s[0] for s in salaires]
     df_clean['salaire_max'] = [s[1] for s in salaires]
     
-    df_clean['experience_years'] = df['experienceExige'].map({'D': 0, 'E': 3}).fillna(1)
-    df_clean['source_url'] = df['origineOffre'].apply(lambda x: x.get('urlOrigine') if isinstance(x, dict) else None)
+    # Expérience et autres
+    df_clean['experience_years'] = df['experienceExige'].map({'D': 0, 'E': 3}).fillna(1) if 'experienceExige' in df.columns else 1
+    df_clean['source_url'] = df['origineOffre'].apply(lambda x: x.get('urlOrigine') if isinstance(x, dict) else None) if 'origineOffre' in df.columns else None
     df_clean['source_platform'] = 'France Travail'
-    df_clean['company'] = df['entreprise'].apply(lambda x: x.get('nom', 'N/A') if isinstance(x, dict) else 'N/A')
-    df_clean['date_du_poste'] = pd.to_datetime(df['dateCreation'])
+    df_clean['company'] = df['entreprise'].apply(lambda x: x.get('nom', 'N/A') if isinstance(x, dict) else 'N/A') if 'entreprise' in df.columns else 'N/A'
+    df_clean['date_du_poste'] = pd.to_datetime(df['dateCreation']) if 'dateCreation' in df.columns else None
     
     return df_clean
 
