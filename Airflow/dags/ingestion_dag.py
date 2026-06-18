@@ -20,7 +20,7 @@ with DAG(
     default_args=default_args,
     description='Ingestion des donnees (Zone Bronze)',
     start_date=datetime(2026, 6, 1),
-    schedule_interval='@daily',
+    schedule_interval=None,
     catchup=False
 ) as dag:
 

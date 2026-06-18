@@ -11,6 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./airflow/init.sql:/docker-entrypoint-initdb.d/01_init_airflow.sql # CREATE USER airflow / CREATE DATABASE airflow
+      - ./database/init.sql:/docker-entrypoint-initdb.d/02_init_project.sql
       # - ./database/init.sql:/docker-entrypoint-initdb.d/02_init_project.sql  # ligne pour charger automatiquement votre script
   
   pgadmin:

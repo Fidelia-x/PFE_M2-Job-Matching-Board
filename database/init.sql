@@ -1,26 +1,30 @@
--- Activer l'extension nécessaire
+\c job_matching
+
 CREATE EXTENSION IF NOT EXISTS vector;
 
-CREATE TABLE offres_emploi (
+CREATE TABLE IF NOT EXISTS offres_emploi (
     id_offres_emploi SERIAL PRIMARY KEY,
+    id_france_travail VARCHAR(50),
     titre VARCHAR(255),
     description TEXT,
     competences TEXT[],       -- Tableau de mots-clés
+    languages TEXT[],
     contract TEXT,
     diplome_requis TEXT,
+    education TEXT,
     localisation TEXT,
     salaire_min FLOAT,
     salaire_max FLOAT,
-    education TEXT,
     experience_years INTEGER,
     source_url TEXT,
     source_platform TEXT,
     company TEXT NOT NULL,
-    languages TEXT[],
     date_du_poste TIMESTAMP DEFAULT NOW(),
 
-    embedding vector(100)    -- La colonne IA
+    embedding vector(384)    -- La colonne IA
 );
+
+CREATE UNIQUE INDEX idx_unique_source_url ON offres_emploi (source_url);
 
 CREATE TABLE cv_candidats (
     id_cv SERIAL PRIMARY KEY,
@@ -33,7 +37,7 @@ CREATE TABLE cv_candidats (
     education_level TEXT,
     certifications TEXT[],
     languages TEXT[],
-    date_de_lanalyse TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    date_de_lanalyse TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    cv_embedding vector(100),
+    cv_embedding vector(384)
 );
