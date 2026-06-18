@@ -1,14 +1,10 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 from datetime import datetime, timedelta
 import sys
 import os
-# sys.path.insert(0, '/opt/airflow')
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-# from scripts.recup_france_travail import run_collecte
-# from scripts.load_to_postgres import load_silver_to_gold
-# from scripts.vectorisateur_data import vectorize_missing_offers
 
 default_args = {
     'owner': 'Fidelia',
@@ -25,23 +21,42 @@ with DAG(
     catchup=False
 ) as dag:
 
-    # 1. Scrapping
+        # 1. Scrapping
     trigger_scrapping = TriggerDagRunOperator(
         task_id='trigger_scrapping',
-        trigger_dag_id='scrapping_france_travail' # ID de ton DAG actuel
+        trigger_dag_id='ingestion_dags',
+        wait_for_completion=True,  # ✅ attend la fin du DAG
+        poke_interval=30,           # vérifie toutes les 30s
+        allowed_states=['success'], # échoue si le DAG cible échoue
     )
 
     # 2. Ingestion (Silver -> Gold)
     trigger_ingestion = TriggerDagRunOperator(
         task_id='trigger_ingestion',
-        trigger_dag_id='load_silver_to_gold'
+        trigger_dag_id='transformation_silver_dag',
+        wait_for_completion=True,
+        poke_interval=30,
+        allowed_states=['success'],
     )
 
-    # 3. Enrichissement (Vectorisation)
+    # 3. Vectorisation
     trigger_vectorization = TriggerDagRunOperator(
-        task_id='trigger_vectorization',
-        trigger_dag_id='vectorize_offres'
+        task_id='trigger_load_silver_to_gold_and_vectorisation',
+        trigger_dag_id='dag_load_to_gold',
+        wait_for_completion=True,
+        poke_interval=30,
+        allowed_states=['success'],
+    )
+
+    create_index_task = PostgresOperator(
+    task_id='create_vector_index',
+    postgres_conn_id='postgres_default', # Ton ID de connexion Postgres
+    sql="""
+        CREATE INDEX IF NOT EXISTS idx_offres_embedding 
+        ON offres_emploi 
+        USING hnsw (embedding vector_cosine_ops);
+    """
     )
 
     # L'ordre logique
-    trigger_scrapping >> trigger_ingestion >> trigger_vectorization
+    trigger_scrapping >> trigger_ingestion >> trigger_vectorization >> create_index_task
