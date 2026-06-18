@@ -4,11 +4,7 @@ from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from datetime import datetime, timedelta
 import sys
 import os
-# sys.path.insert(0, '/opt/airflow')
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-# from scripts.recup_france_travail import run_collecte
-# from scripts.load_to_postgres import load_silver_to_gold
-# from scripts.vectorisateur_data import vectorize_missing_offers
+
 
 default_args = {
     'owner': 'Fidelia',
