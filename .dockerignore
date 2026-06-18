@@ -9,3 +9,5 @@ __pycache__
 airflow/logs/
 airflow/dags/
 scripts/
+.json
+.parket
