@@ -13,4 +13,5 @@ airflow/logs/
 
 data/raw/
 # *.log
-
+.json
+.parket
