@@ -49,3 +49,25 @@ def find_best_matches(cv_text, top_n=3):
         {"id": r[0], "titre": r[1], "company": r[2], "score": round(r[3], 3)} 
         for r in results
     ]
+
+
+# from mistralai.client import MistralClient
+
+# def analyze_gap(cv_text, job_description):
+#     client = MistralClient(api_key="TA_CLE_API_MISTRAL")
+    
+#     prompt = f"""
+#     Analyse ce CV et cette offre d'emploi.
+#     CV: {cv_text}
+#     Offre: {job_description}
+    
+#     Réponds sous ce format JSON strict :
+#     {{
+#         "competences_manquantes": ["comp1", "comp2"],
+#         "conseil": "Texte court",
+#         "projet_suggere": "Nom d'un projet pour apprendre ces skills"
+#     }}
+#     """
+    
+#     response = client.chat(model="mistral-medium", messages=[{"role": "user", "content": prompt}])
+#     return response.choices[0].message.content

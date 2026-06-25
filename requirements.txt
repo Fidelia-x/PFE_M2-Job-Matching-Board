@@ -4,7 +4,6 @@ requests
 psycopg2-binary
 python-dotenv
 minio
-requests
 apache-airflow-providers-amazon
 apache-airflow-providers-postgres
 pyarrow
@@ -12,3 +11,6 @@ boto3
 sentence-transformers
 torch
 transformers
+mistralai
+streamlit
+bcrypt

@@ -4,5 +4,5 @@ requests
 psycopg2-binary
 python-dotenv
 minio
-requests
+streamlit
 bcrypt
