@@ -1,6 +1,7 @@
 __pycache__/
-styles/__pycache__/
-dags/__pycache__/
+frontend/styles/__pycache__/
+frontend/pages/__pycache__/
+airflow/dags/__pycache__/
 .env
 .venv/
 .DS_Store

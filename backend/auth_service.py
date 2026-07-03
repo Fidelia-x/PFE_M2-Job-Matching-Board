@@ -1,5 +1,6 @@
 import bcrypt
 import psycopg2
+from scripts.matching_cv import get_db_connection
 
 def hash_password(password):
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -7,14 +8,33 @@ def hash_password(password):
 def check_password(password, hashed):
     return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
-def verify_user(username, password):
-    # Connexion à ta BDD (utilise ta fonction de connexion existante)
+
+def register_user(nom, prenom, email, password):
+    hashed = hash_password(password)
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT password_hash FROM users WHERE username = %s", (username,))
+    try:
+        cur.execute(
+            "INSERT INTO users (nom, prenom, email, password_hash) VALUES (%s, %s, %s, %s)",
+            (nom, prenom, email, hashed)
+        )
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Erreur : {e}")
+        return False
+    finally:
+        cur.close()
+        conn.close()
+
+def verify_user(email, password):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    # On récupère l'id et le hash pour vérifier
+    cur.execute("SELECT id, password_hash FROM users WHERE email = %s", (email,))
     result = cur.fetchone()
     conn.close()
     
-    if result and check_password(password, result[0]):
-        return True
-    return False
+    if result and check_password(password, result[1]):
+        return result[0] # Retourne l'ID si succès
+    return None
