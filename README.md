@@ -24,7 +24,6 @@ Copiez le fichier `.env.example` en `.env` et ajustez les valeurs avant de déma
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` — accès PostgreSQL
 - `MINIO_USER`, `MINIO_PASSWORD` — accès MinIO
 - `CLIENT_ID`, `CLIENT_SECRET` — variables OAuth (si utilisées)
-- Variables Airflow : `AIRFLOW__*` si vous exposez l'API
 
 Un fichier d'exemple est fourni: `.env.example`.
 
