@@ -76,7 +76,7 @@ pip install -r backend/requirements.txt
 
 ## 🚧 Roadmap : Fonctionnalités à venir
 *Objectifs pour la suite du projet :*
-### Priorité 1 — Produit coeur (à livrer en premier)
+### Priorité 1 — Produit coeur(à livrer en premier)
 
 1. **Dashboard candidat & visualisations**
 
@@ -89,7 +89,7 @@ pip install -r backend/requirements.txt
 - Mapping des "skill gaps" vers cours/ressources (OpenClassrooms, Coursera, etc.).
 - Génération de parcours d'apprentissage simples (3–6 étapes).
 
-### Priorité 2 — Extensions / Bonus (phase 2)
+### Priorité 2 — Extensions/Bonus (phase 2)
 
 3. **Assistant de carrière (Chatbot IA)**
 
