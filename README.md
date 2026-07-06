@@ -32,7 +32,7 @@ Un fichier d'exemple est fourni: `.env.example`.
 1. Clonez le projet :
 
 ```bash
-git clone <URL_DU_REPO>
+git clone <git@github.com:Fidelia-x/PFE_M2-Job-Matching-Board.git>
 cd PFE_M2-Job-Matching-Board
 ```
 2. Lancez l'environnement complet :
