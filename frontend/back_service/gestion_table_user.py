@@ -1,5 +1,7 @@
 import psycopg2
 import bcrypt
+import sys
+sys.path.append('/scripts')
 from scripts.matching_cv import get_db_connection
 
 # DB_CONFIG = {

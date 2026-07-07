@@ -1,4 +1,6 @@
 import streamlit as st
+from back_service.auth_service import register_user, verify_user
+
 
 # st.write("J'ai chargé app.py")
 def render_signup():
@@ -45,9 +47,17 @@ def render_signup():
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("Continuer", type="primary", use_container_width=True):
             if accepte_conditions and email and password:
-                st.session_state.logged_in = True
-                st.session_state.page = 'matching'
-                st.rerun()
+                # st.session_state.logged_in = True
+                # st.session_state.page = 'matching'
+                # st.rerun()
+                if register_user(nom, prenom, email, password):
+                    st.session_state.logged_in = True
+                    st.session_state.user_id = email # ou l'id retourné
+                    st.success("Compte créé avec succès !")
+                    st.session_state.page = 'dashboard'
+                    st.rerun()
+                else:
+                    st.error("Erreur : cet email est peut-être déjà utilisé.")
             else:
                 st.error("Veuillez remplir les champs obligatoires et accepter les conditions.")
             
@@ -152,12 +162,20 @@ def render_login():
                     
         # Bouton de soumission principal
         if st.button("Se connecter", type="primary", use_container_width=True):
-            if email and password:
+            # if email and password:
+            #     st.session_state.logged_in = True
+            #     st.session_state.page = 'dashboard'
+            #     st.rerun()
+            # else:
+            #     st.error("Veuillez remplir tous les champs.")
+            user_id = verify_user(email, password)
+            if user_id:
                 st.session_state.logged_in = True
+                st.session_state.user_id = user_id
                 st.session_state.page = 'dashboard'
                 st.rerun()
             else:
-                st.error("Veuillez remplir tous les champs.")
+                st.error("Email ou mot de passe incorrect.")
                             
         # Lien d'inscription tout en bas (sur une seule ligne et souligné au survol)
         col_txt1, col_btn = st.columns([5, 3])
