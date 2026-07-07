@@ -1,19 +1,6 @@
 import psycopg2
 import bcrypt
 from scripts.matching_cv import get_db_connection
-# from back_service.auth_service import get_db_connection_2
-
-# DB_CONFIG = {
-#     "dbname": "job_matching",
-#     "user": "user",
-#     "password": "password",
-#     "host": "localhost",
-#     # "host": "postgres",
-#     "port": "5432"
-# }
-
-# def get_db_connection():
-#     return psycopg2.connect(**DB_CONFIG)
 
 def init_db():
     """Initialise la base de données : crée la table users si elle n'existe pas."""
