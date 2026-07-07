@@ -98,15 +98,15 @@ services:
       - ./airflow/logs:/opt/airflow/logs
       - ./scripts:/opt/airflow/scripts
       
-  fastapi:
-    build:
-      context: ./backend  # dossier contenant ton api.py et requirements.txt
-      dockerfile: Dockerfile
-    container_name: job_fastapi
-    ports:
-      - "8000:8000"
-    depends_on:
-      - postgres
+  # fastapi:
+  #   build:
+  #     context: ./backend  # dossier contenant ton api.py et requirements.txt
+  #     dockerfile: Dockerfile
+  #   container_name: job_fastapi
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - postgres
 
   streamlit:
     build:
@@ -117,13 +117,14 @@ services:
       - "8501:8501"
     volumes:
       - ./frontend:/app
+      - ./scripts:/app/scripts
+      # - ./backend:/backend
     environment:
       - STREAMLIT_SERVER_FILE_WATCHER_TYPE=poll
       - PYTHONPATH=/app
-    # command: streamlit run frontend/app.py --server.port=8501 --server.fileWatcherType=poll
     command: streamlit run app.py --server.port=8501 --server.fileWatcherType=poll
     depends_on:
-      - fastapi
+      - postgres
 
 volumes:
   postgres_data:

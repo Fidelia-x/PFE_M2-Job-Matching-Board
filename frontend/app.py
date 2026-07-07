@@ -64,16 +64,33 @@ if 'logged_in' not in st.session_state:
 # --- LOGIQUE DE NAVIGATION ---
 def show_page():
     # render_header()
-    if st.session_state.page == 'accueil':
-        render_accueil()
-    elif st.session_state.page == 'signup':
-        render_signup()
-    elif st.session_state.page == 'login':
-        render_login()
-    elif st.session_state.page == 'matching' and st.session_state.logged_in:
-        render_matching()
-    elif st.session_state.page == 'dashboard':
-        render_dashboard()
+    # if st.session_state.page == 'accueil':
+    #     render_accueil()
+    # elif st.session_state.page == 'signup':
+    #     render_signup()
+    # elif st.session_state.page == 'login':
+    #     render_login()
+    # elif st.session_state.page == 'matching' and st.session_state.logged_in:
+    #     render_matching()
+    # elif st.session_state.page == 'dashboard':
+    #     render_dashboard()
+    
+    # Protection : si l'utilisateur n'est pas connecté et essaie d'accéder au dashboard/matching
+    if not st.session_state.logged_in:
+        if st.session_state.page == 'signup':
+            render_signup()
+        elif st.session_state.page == 'login':
+            render_login()
+        else:
+            render_accueil() # Par défaut, accueil pour les non-connectés
+    else:
+        # Zone connectée
+        if st.session_state.page == 'dashboard':
+            render_dashboard()
+        elif st.session_state.page == 'matching':
+            render_matching()
+        else:
+            render_dashboard() # Page par défaut après login
 
 
 show_page()

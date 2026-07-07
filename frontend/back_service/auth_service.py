@@ -1,5 +1,10 @@
 import bcrypt
 import psycopg2
+
+import sys
+import os
+sys.path.append('/scripts')
+
 from scripts.matching_cv import get_db_connection
 
 def hash_password(password):
