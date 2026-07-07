@@ -46,20 +46,6 @@ def render_signup():
         
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("Continuer", type="primary", use_container_width=True):
-        #     if not (accepte_conditions and email and password):
-        #         st.error("Veuillez remplir les champs obligatoires et accepter les conditions.")
-        #     elif not is_valid_email(email):
-        #         st.error("Email invalide. Vérifiez le format (ex: nom@domaine.com).")
-        #     else:
-        #         user_id = register_user(nom, prenom, email, password)
-        #         if user_id:
-        #             st.session_state.logged_in = True
-        #             st.session_state.user_id = user_id
-        #             st.success("Compte créé avec succès !")
-        #             st.session_state.page = 'dashboard'
-        #             st.rerun()
-        #         else:
-        #             st.error("Erreur : cet email est peut-être déjà utilisé.")
             if not (accepte_conditions and email and password):
                 st.error("Veuillez remplir les champs obligatoires et accepter les conditions.")
             elif not is_valid_email(email):
@@ -176,19 +162,6 @@ def render_login():
             if st.button("Mot de passe oublié ?", type='tertiary', key="forgot_pass"):
                 st.toast("Lien de récupération envoyé !")
                     
-        # Bouton de soumission principal
-        # if st.button("Se connecter", type="primary", use_container_width=True):
-        #     if not is_valid_email(email):
-        #         st.error("Email invalide. Vérifiez le format (ex: nom@domaine.com).")
-        #     else:
-        #         user_id = verify_user(email, password)
-        #         if user_id:
-        #             st.session_state.logged_in = True
-        #             st.session_state.user_id = user_id
-        #             st.session_state.page = 'dashboard'
-        #             st.rerun()
-        #         else:
-        #             st.error("Email ou mot de passe incorrect.")
         if st.button("Se connecter", type="primary", use_container_width=True):
             if not is_valid_email(email):
                 st.error("Email invalide. Vérifiez le format (ex: nom@domaine.com).")

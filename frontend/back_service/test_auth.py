@@ -1,7 +1,6 @@
 # test_auth.py
 # from auth_service import register_user
 from back_service.auth_service import register_user
-# from gestion_table_user import init_db
 from frontend.back_service.gestion_table_user import init_db
 
 
