@@ -1,5 +1,5 @@
 import streamlit as st
-from back_service.auth_service import register_user, verify_user
+from back_service.auth_service import register_user, verify_user,is_valid_email
 
 
 # st.write("J'ai chargé app.py")
@@ -46,20 +46,36 @@ def render_signup():
         
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("Continuer", type="primary", use_container_width=True):
-            if accepte_conditions and email and password:
-                # st.session_state.logged_in = True
-                # st.session_state.page = 'matching'
-                # st.rerun()
-                if register_user(nom, prenom, email, password):
+        #     if not (accepte_conditions and email and password):
+        #         st.error("Veuillez remplir les champs obligatoires et accepter les conditions.")
+        #     elif not is_valid_email(email):
+        #         st.error("Email invalide. Vérifiez le format (ex: nom@domaine.com).")
+        #     else:
+        #         user_id = register_user(nom, prenom, email, password)
+        #         if user_id:
+        #             st.session_state.logged_in = True
+        #             st.session_state.user_id = user_id
+        #             st.success("Compte créé avec succès !")
+        #             st.session_state.page = 'dashboard'
+        #             st.rerun()
+        #         else:
+        #             st.error("Erreur : cet email est peut-être déjà utilisé.")
+            if not (accepte_conditions and email and password):
+                st.error("Veuillez remplir les champs obligatoires et accepter les conditions.")
+            elif not is_valid_email(email):
+                st.error("Email invalide. Vérifiez le format (ex: nom@domaine.com).")
+            else:
+                user_id, msg = register_user(nom, prenom, email, password)
+                if msg == "ok":
                     st.session_state.logged_in = True
-                    st.session_state.user_id = email # ou l'id retourné
+                    st.session_state.user_id = user_id
                     st.success("Compte créé avec succès !")
                     st.session_state.page = 'dashboard'
                     st.rerun()
+                elif msg == "email_deja_utilise":
+                    st.error("Cet email est déjà utilisé.")
                 else:
-                    st.error("Erreur : cet email est peut-être déjà utilisé.")
-            else:
-                st.error("Veuillez remplir les champs obligatoires et accepter les conditions.")
+                    st.error("Une erreur est survenue, réessayez plus tard.")
             
         col_txt1, col_btn = st.columns([8, 2])
         
@@ -161,21 +177,32 @@ def render_login():
                 st.toast("Lien de récupération envoyé !")
                     
         # Bouton de soumission principal
+        # if st.button("Se connecter", type="primary", use_container_width=True):
+        #     if not is_valid_email(email):
+        #         st.error("Email invalide. Vérifiez le format (ex: nom@domaine.com).")
+        #     else:
+        #         user_id = verify_user(email, password)
+        #         if user_id:
+        #             st.session_state.logged_in = True
+        #             st.session_state.user_id = user_id
+        #             st.session_state.page = 'dashboard'
+        #             st.rerun()
+        #         else:
+        #             st.error("Email ou mot de passe incorrect.")
         if st.button("Se connecter", type="primary", use_container_width=True):
-            # if email and password:
-            #     st.session_state.logged_in = True
-            #     st.session_state.page = 'dashboard'
-            #     st.rerun()
-            # else:
-            #     st.error("Veuillez remplir tous les champs.")
-            user_id = verify_user(email, password)
-            if user_id:
-                st.session_state.logged_in = True
-                st.session_state.user_id = user_id
-                st.session_state.page = 'dashboard'
-                st.rerun()
+            if not is_valid_email(email):
+                st.error("Email invalide. Vérifiez le format (ex: nom@domaine.com).")
             else:
-                st.error("Email ou mot de passe incorrect.")
+                user_id, msg = verify_user(email, password)
+                if msg == "ok":
+                    st.session_state.logged_in = True
+                    st.session_state.user_id = user_id
+                    st.session_state.page = 'dashboard'
+                    st.rerun()
+                elif msg == "identifiants_invalides":
+                    st.error("Email ou mot de passe incorrect.")
+                else:
+                    st.error("Une erreur est survenue, réessayez plus tard.")
                             
         # Lien d'inscription tout en bas (sur une seule ligne et souligné au survol)
         col_txt1, col_btn = st.columns([5, 3])

@@ -1,8 +1,7 @@
 import psycopg2
 import bcrypt
-import sys
-sys.path.append('/scripts')
 from scripts.matching_cv import get_db_connection
+# from back_service.auth_service import get_db_connection_2
 
 # DB_CONFIG = {
 #     "dbname": "job_matching",
