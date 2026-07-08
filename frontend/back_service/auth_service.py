@@ -101,3 +101,20 @@ def verify_user(email: str, password: str):
     finally:
         cur.close()
         conn.close()
+
+def get_user_info(user_id: int):
+    """Récupère nom et prénom d'un utilisateur à partir de son ID."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT nom, prenom FROM users WHERE id = %s", (user_id,))
+        result = cur.fetchone()
+        if result:
+            return {"nom": result[0], "prenom": result[1]}
+        return None
+    except Exception as e:
+        print(f"Erreur lors de la récupération de l'utilisateur : {e}")
+        return None
+    finally:
+        cur.close()
+        conn.close()
