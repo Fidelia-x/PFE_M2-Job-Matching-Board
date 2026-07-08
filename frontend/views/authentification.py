@@ -1,5 +1,5 @@
 import streamlit as st
-from back_service.auth_service import register_user, verify_user,is_valid_email
+from back_service.auth_service import register_user, verify_user,is_valid_email, get_user_info
 
 
 # st.write("J'ai chargé app.py")
@@ -55,6 +55,12 @@ def render_signup():
                 if msg == "ok":
                     st.session_state.logged_in = True
                     st.session_state.user_id = user_id
+
+                    user_info = get_user_info(user_id)
+                    if user_info:
+                        st.session_state.user_prenom = user_info["prenom"]
+                        st.session_state.user_nom = user_info["nom"]
+
                     st.success("Compte créé avec succès !")
                     st.session_state.page = 'dashboard'
                     st.rerun()

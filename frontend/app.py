@@ -4,23 +4,23 @@ import os
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 import importlib
-import pages.authentification
-import pages.header_acceuil
-import pages.dashboard
-import pages.matching
+import views.authentification
+import views.header_acceuil
+import views.dashboard
+import views.matching
 import styles.main_style
 
-importlib.reload(pages.authentification)
-importlib.reload(pages.header_acceuil)
-importlib.reload(pages.dashboard)
-importlib.reload(pages.matching)
+importlib.reload(views.authentification)
+importlib.reload(views.header_acceuil)
+importlib.reload(views.dashboard)
+importlib.reload(views.matching)
 importlib.reload(styles.main_style)
 
 from styles.main_style import inject_main_style
-from pages.header_acceuil import render_accueil
-from pages.authentification import render_login, render_signup
-from pages.dashboard import render_dashboard
-from pages.matching import render_matching
+from views.header_acceuil import render_accueil
+from views.authentification import render_login, render_signup
+from views.dashboard import render_dashboard
+from views.matching import render_matching
 from back_service.gestion_table_user import init_db
 
 
