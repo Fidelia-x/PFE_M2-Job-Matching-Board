@@ -22,7 +22,7 @@ def render_accueil():
 
     st.markdown("<br><br>", unsafe_allow_html=True) 
     st.markdown("<h1 style='text-align: center;'>Trouvez le match parfait en quelques secondes.</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #6c757d; font-size: 1.2rem;'>Uploadez votre CV, notre IA analyse vos compétences et vous connecte aux meilleures opportunités.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #7A7266; font-size: 1.2rem;'>Uploadez votre CV, notre IA analyse vos compétences et vous connecte aux meilleures opportunités.</p>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True) 
     
     col_a, col_b, col_c = st.columns([1, 1, 1])

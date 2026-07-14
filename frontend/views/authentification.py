@@ -22,12 +22,12 @@ def render_signup():
             align-items: center;
             gap: 12px;
             margin: 20px 0;
-            color: #9aa0a6;
+            color: #7A7266;
             font-weight: 600;
         ">
-            <div style="flex: 1; height: 1px; background: #d9d9d9;"></div>
+            <div style="flex: 1; height: 1px; background: #DDD3C2;"></div>
             <div>ou</div>
-            <div style="flex: 1; height: 1px; background: #d9d9d9;"></div>
+            <div style="flex: 1; height: 1px; background: #DDD3C2;"></div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -72,7 +72,7 @@ def render_signup():
         col_txt1, col_btn = st.columns([8, 2])
         
         with col_txt1:
-            st.markdown("<div style='text-align: left; color: #6c757d; padding-top: 9px;  font-size:0.9rem; margin-left: 180px;'>Vous avez déjà un compte ?</div>",unsafe_allow_html=True)
+            st.markdown("<div style='text-align: left; color: #7A7266; padding-top: 9px;  font-size:0.9rem; margin-left: 180px;'>Vous avez déjà un compte ?</div>",unsafe_allow_html=True)
             
 
         st.markdown("""
@@ -80,7 +80,7 @@ def render_signup():
             .st-key-login_link button {
                 background: none !important;
                 border: none !important;
-                color: #111827 !important;
+                color: #2B2620 !important;
                 font-weight: 700 !important;
                 text-decoration: underline !important;
                 padding: 0 !important;
@@ -88,7 +88,7 @@ def render_signup():
                 margin-left: -195px;
             }
             .st-key-login_link button:hover {
-                color: #4f46e5 !important;
+                color: #B5654A !important;
                 background: none !important;
             }
             </style>
@@ -106,7 +106,7 @@ def render_signup():
     #         <h2 style='color: white; margin-bottom: 20px;'>SkillGap AI</h2>
     #         <p style='font-size: 3.5rem; margin: 0;'>📄 ➔ 🤖 ➔ 🎯</p>
     #         <br>
-    #         <p style='color: #E2D5E5; font-size: 1.1rem; max-width: 280px;'>
+    #         <p style='color: #EFE2D8; font-size: 1.1rem; max-width: 280px;'>
     #             Laissez notre modèle analyser votre CV et extraire vos compétences clés automatiquement.
     #         </p>
     #     </div>
@@ -127,12 +127,12 @@ def render_login():
             align-items: center;
             gap: 12px;
             margin: 20px 0;
-            color: #9aa0a6;
+            color: #7A7266;
             font-weight: 600;
         ">
-            <div style="flex: 1; height: 1px; background: #9aa0a6;"></div>
+            <div style="flex: 1; height: 1px; background: #DDD3C2;"></div>
             <div>ou</div>
-            <div style="flex: 1; height: 1px; background: #9aa0a6;"></div>
+            <div style="flex: 1; height: 1px; background: #DDD3C2;"></div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -152,14 +152,14 @@ def render_login():
             background: none !important;
             border: none !important;
             padding: 0 !important;
-            color: #111827 !important;
+            color: #2B2620 !important;
             font-weight: 700 !important;
             text-decoration: underline !important;
             box-shadow: none !important;
             padding: 0 !important;        
         }
         .st-key-forgot_pass button:hover {
-            color: #4f46e5 !important;
+            color: #B5654A !important;
             background: none !important;
         }
         </style>
@@ -176,6 +176,12 @@ def render_login():
                 if msg == "ok":
                     st.session_state.logged_in = True
                     st.session_state.user_id = user_id
+
+                    user_info = get_user_info(user_id)
+                    if user_info:
+                        st.session_state.user_prenom = user_info["prenom"]
+                        st.session_state.user_nom = user_info["nom"]
+
                     st.session_state.page = 'dashboard'
                     st.rerun()
                 elif msg == "identifiants_invalides":
@@ -186,14 +192,14 @@ def render_login():
         # Lien d'inscription tout en bas (sur une seule ligne et souligné au survol)
         col_txt1, col_btn = st.columns([5, 3])
         with col_txt1:
-            st.markdown("<div style='text-align: left; color: #6c757d; padding-top: 9px;  font-size:0.9rem; margin-left: 210px;'>Pas encore de compte ?</div>",unsafe_allow_html=True)
+            st.markdown("<div style='text-align: left; color: #7A7266; padding-top: 9px;  font-size:0.9rem; margin-left: 210px;'>Pas encore de compte ?</div>",unsafe_allow_html=True)
 
         st.markdown("""
             <style>
             .st-key-login_link button {
                 background: none !important;
                 border: none !important;
-                color: #111827 !important;
+                color: #2B2620 !important;
                 font-weight: 700 !important;
                 text-decoration: underline !important;
                 padding: 0 !important;
@@ -201,7 +207,7 @@ def render_login():
                 margin-left: -165px;
             }
             .st-key-login_link button:hover {
-                color: #4f46e5 !important;
+                color: #B5654A !important;
                 background: none !important;
             }
             </style>
@@ -219,11 +225,11 @@ def render_login():
     #     st.markdown(f"""
     #     <div class="illustration-box-dark">
     #         <h2 style='color: white; margin-bottom: 10px; font-weight: 700;'>SkillGap AI</h2>
-    #         <p style='color: #A78BFA; font-size: 1.1rem;'>L'intelligence artificielle au service de votre carrière.</p>
+    #         <p style='color: #EFE2D8; font-size: 1.1rem;'>L'intelligence artificielle au service de votre carrière.</p>
     #         <br>
     #         <p style='font-size: 4rem; margin: 20px 0;'>✨🤖🎯</p>
     #         <br>
-    #         <p style='color: #7C7C8A; font-size: 0.9rem; max-width: 260px;'>
+    #         <p style='color: #D8C7BC; font-size: 0.9rem; max-width: 260px;'>
     #             Connectez-vous pour analyser instantanément vos compétences par rapport aux attentes du marché.
     #         </p>
     #     </div>
