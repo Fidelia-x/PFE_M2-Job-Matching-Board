@@ -4,3 +4,10 @@ fileWatcherType = "poll"
 
 [runner]
 fastReruns = true
+
+[theme]
+base = "light"
+primaryColor = "#B5654A"
+backgroundColor = "#FAF7F2"
+secondaryBackgroundColor = "#F3EEE6"
+textColor = "#2B2620"

@@ -1,7 +1,10 @@
 streamlit
+pandas
 bcrypt
 psycopg2-binary
 requests
 pgvector
 python-dotenv
 sentence-transformers
+pdfplumber
+python-docx

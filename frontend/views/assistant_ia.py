@@ -3,10 +3,10 @@ from styles.dashbord_style import inject_dashboard_style
 from views.sidebar import render_sidebar
 from views.header_board import render_header
 
-def render_dashboard():
+def render_assistant_ia():
     inject_dashboard_style()
-    render_sidebar(active_page="dashboard")
-    render_header(subtitle="Voici votre tableau de bord")
+    render_sidebar(active_page="Assistant IA")
+    render_header(subtitle="Voici des recommandations de formations adaptées à votre profil", title="Assistant IA")
 
     st.markdown("""
     <div class="sg-placeholder-wrap">
