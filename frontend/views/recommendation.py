@@ -4,7 +4,7 @@ from views.sidebar import render_sidebar
 from views.header_board import render_header
 from views.gating import require_matching
 from scripts.matching_cv import rank_missing_skills
-from scripts.training_catalog import get_trainings_for_skill
+from scripts.training_catalog import get_trainings_for_skill, search_fallback_link
 from back_service.recommendation_service import get_skill_advice
 
 # Nombre d'écarts de compétences traités : au-delà, la page devient trop
@@ -48,10 +48,14 @@ def render_recommendation():
                 </div>
                 """, unsafe_allow_html=True)
         else:
+            # Ne devrait plus arriver pour une compétence du référentiel
+            # (catalogue couvre les 96), mais reste un filet de sécurité si
+            # le référentiel s'agrandit avant que le catalogue suive.
+            fallback = search_fallback_link(skill)
             st.markdown(f"""
             <div class="sg-training-card">
-                <p class="sg-training-title">{skill}</p>
-                <p class="sg-training-meta">Absente de {pct}% des offres — pas encore de formation référencée pour cette compétence.</p>
+                <p class="sg-training-title"><a href="{fallback}" target="_blank" rel="noopener noreferrer">Rechercher des formations "{skill}" ↗</a></p>
+                <p class="sg-training-meta">Absente de {pct}% des offres — pas encore de formation référencée précisément pour cette compétence.</p>
             </div>
             """, unsafe_allow_html=True)
 
