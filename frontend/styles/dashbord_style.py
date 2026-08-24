@@ -438,11 +438,14 @@ _STATIC_CSS = """
     padding: 1.25rem;
 }
 
-/* Grille de KPI (jamais plus de 3 par ligne) */
+/* Grille de KPI (jamais plus de 3 par ligne). minmax(200px, 1fr) est
+   indispensable : un minimum à 0 est un cas dégénéré pour auto-fit (le
+   navigateur ne peut pas calculer combien de colonnes créer et retombe
+   parfois sur une seule, empilant chaque carte sur sa propre ligne au lieu
+   de les mettre côte à côte). */
 .sg-kpi-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-    grid-auto-flow: column;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
 }
@@ -466,6 +469,36 @@ _STATIC_CSS = """
     font-weight: 700;
     font-size: 1.7rem;
     color: var(--text-hi);
+}
+.sg-kpi-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    color: var(--text-discreet);
+    margin-top: 0.3rem;
+}
+.sg-kpi-sub-center { text-align: center; }
+/* Variante centrée : ring de score, gros nombre ou compétence en évidence,
+   plutôt que le label/valeur alignés à gauche du KPI par défaut. */
+.sg-kpi-center { text-align: center; }
+.sg-kpi-center .sg-kpi-label { text-align: center; }
+.sg-kpi-value-danger {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--danger);
+}
+.sg-ring-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 0.3rem 0;
+}
+.sg-ring-track { stroke: var(--accent-dim); }
+.sg-ring-progress { stroke: var(--accent); }
+.sg-ring-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    fill: var(--text-hi);
 }
 
 /* Pastilles de statut (couleur seule, pas d'icône) */
@@ -608,6 +641,15 @@ a.sg-offer-card:hover {
     text-transform: uppercase;
     color: var(--text-discreet);
     text-align: right;
+}
+.sg-offer-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--ink-700);
+    width: 100%;
 }
 
 /* Cartes de formation (Recommandations) */

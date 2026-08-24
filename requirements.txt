@@ -15,3 +15,5 @@ mistralai
 streamlit
 bcrypt
 pgvector
+pdfplumber
+python-docx

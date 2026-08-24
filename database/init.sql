@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS offres_emploi (
     source_url TEXT,
     source_platform TEXT,
     company TEXT NOT NULL,
+    secteur_activite TEXT,
     date_du_poste TIMESTAMP DEFAULT NOW(),
 
     embedding vector(384)    -- La colonne IA

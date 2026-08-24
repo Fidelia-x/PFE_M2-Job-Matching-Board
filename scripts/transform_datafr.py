@@ -75,14 +75,22 @@ def transformer_data(json_data):
     df_clean['titre'] = get_col('intitule', 'N/A')
     df_clean['description'] = get_col('description', '')
     
-    # Gestion des tableaux avec vérification de l'existence de la colonne
+    # Gestion des tableaux avec vérification de l'existence de la colonne.
+    # Certaines offres renvoyées par l'API France Travail contiennent des
+    # éléments sans clé 'libelle' (ou qui ne sont pas des dict) : on les
+    # ignore au lieu de planter tout le DAG sur une seule offre malformée.
+    def extract_libelles(x):
+        if not isinstance(x, list):
+            return []
+        return [item['libelle'] for item in x if isinstance(item, dict) and 'libelle' in item]
+
     if 'competences' in df.columns:
-        df_clean['competences'] = df['competences'].apply(lambda x: [item['libelle'] for item in x] if isinstance(x, list) else [])
+        df_clean['competences'] = df['competences'].apply(extract_libelles)
     else:
         df_clean['competences'] = [[] for _ in range(len(df))]
 
     if 'langues' in df.columns:
-        df_clean['languages'] = df['langues'].apply(lambda x: [item['libelle'] for item in x] if isinstance(x, list) else [])
+        df_clean['languages'] = df['langues'].apply(extract_libelles)
     else:
         df_clean['languages'] = [[] for _ in range(len(df))]
     
@@ -106,6 +114,7 @@ def transformer_data(json_data):
     df_clean['source_url'] = df['origineOffre'].apply(lambda x: x.get('urlOrigine') if isinstance(x, dict) else None) if 'origineOffre' in df.columns else None
     df_clean['source_platform'] = 'France Travail'
     df_clean['company'] = df['entreprise'].apply(lambda x: x.get('nom', 'N/A') if isinstance(x, dict) else 'N/A') if 'entreprise' in df.columns else 'N/A'
+    df_clean['secteur_activite'] = get_col('secteurActiviteLibelle')
     df_clean['date_du_poste'] = pd.to_datetime(df['dateCreation']) if 'dateCreation' in df.columns else None
     
     return df_clean
