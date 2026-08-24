@@ -1,22 +1,6 @@
 import json
-import os
 
-from dotenv import load_dotenv
-from mistralai.client import Mistral
-
-load_dotenv()
-
-_client = None
-
-
-def _get_client():
-    global _client
-    if _client is None:
-        api_key = os.getenv("MISTRAL_API_KEY")
-        if not api_key:
-            return None
-        _client = Mistral(api_key=api_key)
-    return _client
+from back_service.mistral_client import get_client
 
 
 def get_skill_advice(missing_skills):
@@ -40,7 +24,7 @@ def get_skill_advice(missing_skills):
     if not missing_skills:
         return {}
 
-    client = _get_client()
+    client = get_client()
     if client is None:
         return {}
 

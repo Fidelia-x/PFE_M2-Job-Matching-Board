@@ -142,24 +142,6 @@ _STATIC_CSS = """
 }
 /* Le bouton de nav actif est surligné dynamiquement selon active_page (voir sidebar.py) */
 
-/* Badge "bientôt" sur le bouton Assistant IA */
-.st-key-nav_assistant button {
-    display: flex;
-}
-.st-key-nav_assistant button::after {
-    content: "bientôt";
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--text-lo);
-    border: 1px solid var(--ink-700);
-    padding: 1px 6px;
-    border-radius: 20px;
-    margin-left: auto;
-    flex-shrink: 0;
-}
-
 /* Liens désactivés ("bientôt") */
 .sg-nav-disabled {
     display: flex;
@@ -807,6 +789,114 @@ a.sg-offer-card:hover {
     height: 56px;
     border-radius: 10px;
     border: 1px solid var(--ink-700);
+}
+
+/* Assistant IA — carte de chat (le conteneur lui-même vient de
+   st.container(border=True), seul l'intérieur est stylé ici) */
+.sg-chat-header-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--ink-700);
+}
+.sg-chat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.sg-chat-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 1.02rem;
+    color: var(--text-hi);
+}
+.sg-chat-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    color: var(--text-lo);
+}
+/* Bulles de chat : conteneurs stylés via st.container(key=...) plutôt que du
+   HTML brut autour du contenu, pour que le markdown de la réponse (gras,
+   listes...) soit réellement interprété par Streamlit — imbriqué dans un
+   <div> écrit à la main, il resterait du texte littéral avec des ** visibles. */
+[class*="st-key-bubble_user_"], [class*="st-key-bubble_bot_"] {
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.7rem;
+    color: var(--text-hi);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    max-width: 85%;
+}
+[class*="st-key-bubble_bot_"] { background: var(--ink-900); }
+[class*="st-key-bubble_user_"] { background: var(--accent-dim); margin-left: auto; }
+
+/* Matching — carte "Quoi apprendre en priorité" */
+[class*="st-key-priority_row_"] {
+    background: var(--ink-900);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    margin-bottom: 0.6rem;
+}
+
+/* Matching — bandeau CTA vers Recommandations (contenu dans .sg-banner /
+   .sg-banner-text, mais le bouton est un vrai widget Streamlit qu'on ne peut
+   pas imbriquer dans le HTML du bandeau — même style appliqué au conteneur) */
+.st-key-reco_banner {
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+}
+
+/* Assistant IA — panneau de contexte (conteneur via st.container(border=True)) */
+.sg-context-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-hi);
+    margin-bottom: 0.85rem;
+}
+.sg-context-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--ink-700);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+}
+.sg-context-row:last-child { border-bottom: none; }
+.sg-context-label { color: var(--text-discreet); }
+.sg-context-value { color: var(--text-hi); font-weight: 600; text-align: right; }
+.sg-capabilities-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-lo);
+    line-height: 1.6;
+}
+
+/* Puces de questions suggérées (une classe .st-key-chat_chip_N par bouton,
+   même pattern que .st-key-nav_assistant pour les boutons de la sidebar) */
+.st-key-chat_chip_0 button, .st-key-chat_chip_1 button,
+.st-key-chat_chip_2 button, .st-key-chat_chip_3 button {
+    border-radius: 20px !important;
+    background: var(--ink-900) !important;
+    border: 1px solid var(--ink-700) !important;
+    color: var(--text-lo) !important;
+    font-size: 0.82rem !important;
+    padding: 0.4rem 0.9rem !important;
 }
 """
 
