@@ -36,9 +36,14 @@ def render_recommendation():
         trainings = get_trainings_for_skill(skill)
         if trainings:
             for formation in trainings:
+                lien = formation.get("lien")
+                titre = (
+                    f'<a href="{lien}" target="_blank" rel="noopener noreferrer">{formation["nom"]} ↗</a>'
+                    if lien else formation["nom"]
+                )
                 st.markdown(f"""
                 <div class="sg-training-card">
-                    <p class="sg-training-title">{formation['nom']}</p>
+                    <p class="sg-training-title">{titre}</p>
                     <p class="sg-training-meta">{formation['organisme']} · {formation['duree']} · comble : {skill} (absente de {pct}% des offres)</p>
                 </div>
                 """, unsafe_allow_html=True)
