@@ -11,7 +11,7 @@ boto3
 sentence-transformers
 torch
 transformers
-mistralai
+mistralai==2.9.4
 streamlit
 bcrypt
 pgvector
