@@ -53,6 +53,13 @@ Réponds uniquement avec un JSON strict de cette forme, sans texte autour :
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"},
         )
-        return json.loads(response.choices[0].message.content)
+        raw = json.loads(response.choices[0].message.content)
     except Exception:
         return {}
+
+    # Mistral ne réécrit pas toujours la compétence avec exactement la même
+    # casse qu'en entrée (ex. "Sql" envoyé, "SQL" reçu) — on retrouve la
+    # correspondance insensible à la casse et on reclé sur le label exact
+    # attendu par l'appelant, sinon .get(skill) raterait silencieusement.
+    lookup = {key.lower(): value for key, value in raw.items()}
+    return {skill: lookup[skill.lower()] for skill in missing_skills if skill.lower() in lookup}
