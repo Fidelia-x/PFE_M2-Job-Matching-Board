@@ -102,6 +102,20 @@ def rank_missing_skills(offers):
     return [(skill, round(100 * count / len(offers))) for skill, count in counter.most_common()]
 
 
+def get_profile_summary(offers, top_n_skills=5):
+    """Résumé du profil du candidat à partir de ses offres matchées — même
+    calculs que les tuiles KPI de la page Matching, centralisés ici pour être
+    réutilisables ailleurs (ex. contexte envoyé à l'assistant IA) sans
+    dupliquer la logique. Retourne {} si aucune offre matchée."""
+    if not offers:
+        return {}
+    return {
+        "score": round(offers[0]["score"] * 100),
+        "compatible_count": sum(1 for o in offers if round(o["score"] * 100) >= 70),
+        "missing_skills": [skill for skill, _ in rank_missing_skills(offers)[:top_n_skills]],
+    }
+
+
 def get_market_fit_stats(cv_text, eligibility_threshold=0.70):
     """Statistiques du CV face à l'ensemble du marché (même fenêtre de 30
     jours que find_best_matches), pas seulement le top_n affiché à l'écran :
