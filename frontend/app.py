@@ -6,6 +6,11 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 import importlib
 import styles.main_style
 import styles.dashbord_style
+import back_service.market_stats
+import back_service.cv_parser
+import back_service.auth_service
+import back_service.gestion_table_user
+import views.offer_card
 import views.authentification
 import views.header_acceuil
 import views.offres
@@ -14,12 +19,19 @@ import views.tendences
 import views.recommendation
 import views.assistant_ia
 
-# Les modules de style sont rechargés en premier : les vues font
-# `from styles.xxx import ...` à l'import, donc si on les recharge après les
-# vues, ces dernières gardent la fonction figée de la toute première exécution
-# du process (le cache de sys.modules n'est pas rafraîchi par runOnSave).
+# Les modules de style, back_service et views.offer_card sont rechargés en
+# premier : les vues font `from styles.xxx import ...` / `from back_service.xxx
+# import ...` / `from views.offer_card import ...` à l'import, donc si on les
+# recharge après les vues, ces dernières gardent la fonction figée de la toute
+# première exécution du process (le cache de sys.modules n'est pas rafraîchi
+# par runOnSave).
 importlib.reload(styles.main_style)
 importlib.reload(styles.dashbord_style)
+importlib.reload(back_service.market_stats)
+importlib.reload(back_service.cv_parser)
+importlib.reload(back_service.auth_service)
+importlib.reload(back_service.gestion_table_user)
+importlib.reload(views.offer_card)
 importlib.reload(views.authentification)
 importlib.reload(views.header_acceuil)
 importlib.reload(views.offres)

@@ -117,11 +117,11 @@ services:
       - "8501:8501"
     volumes:
       - ./frontend:/app
-      - ./scripts:/app/scripts
+      - ./scripts:/pylibs/scripts
       # - ./backend:/backend
     environment:
       - STREAMLIT_SERVER_FILE_WATCHER_TYPE=poll
-      - PYTHONPATH=/app
+      - PYTHONPATH=/app:/pylibs
     command: streamlit run app.py --server.port=8501 --server.fileWatcherType=poll
     depends_on:
       - postgres

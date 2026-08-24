@@ -6,6 +6,8 @@ from psycopg2.extras import execute_values
 import numpy as np
 import re
 
+from scripts.skills_reference import extract_skills
+
 CONN_ID  = "minio"
 
 def init_database(pg_hook):
@@ -30,6 +32,7 @@ def init_database(pg_hook):
         source_url TEXT,
         source_platform TEXT,
         company TEXT NOT NULL,
+        secteur_activite TEXT,
         date_du_poste TIMESTAMP,
         embedding vector(384)
     );
@@ -69,31 +72,9 @@ def clean_languages(description):
     return found_langs if found_langs else []
 
 def clean_competences(description):
-    # 1. On convertit tout le texte en minuscules une seule fois
-    text = str(description).lower()
-    
-    # 2. On définit tes listes de compétences, toujours en minuscules
-    categories = {
-    'Langages pour le Backend': ['python', 'java', 'scala', 'go', 'node.js', 'fastapi', 'flask', 'r'],
-    'Langages pour le Frontend': ['javascript', 'typescript', 'react', 'vue', 'html', 'css', 'angular', 'Svelte'],
-
-    'Data Stores': ['postgresql', 'mongodb', 'mysql', 'redis', 'elasticsearch', 'snowflake', 'oracle'],
-
-    'Cloud & Infra': ['sql', 'aws', 'gcp', 'azure', 'docker', 'kubernetes', 'snowflake', 'terraform'],
-    'Data Engineering': ['dbt', 'airflow', 'spark', 'kafka', 'hadoop'],
-    'IA/ML': ['tensorflow', 'pytorch', 'scikit-learn', 'llm', 'rag', 'mlops', 'langchain'],
-    'No-Code': ['airtable', 'make', 'bubble', 'power bi', 'zapier', 'tableau', 'metabase', 'webflow', 'excel', 'notion']
-    }
-    
-    found_skills = []
-    
-    # 3. La comparaison se fait maintenant sur deux minuscules
-    for category, skills in categories.items():
-        for skill in skills:
-            if skill in text: # 'skill' est déjà en minuscule ici
-                found_skills.append(skill.capitalize()) # On remet la majuscule juste pour l'affichage propre
-                
-    return list(set(found_skills)) # set() évite les doublons si le mot apparaît deux fois
+    # Référentiel partagé avec le matching CV (scripts.skills_reference), pour
+    # que les compétences détectées côté offres et côté CV soient comparables.
+    return extract_skills(description)
 
 def clean_education_level(text):
     text = str(text).lower()
@@ -209,17 +190,18 @@ def load_silver_to_gold():
         # Requête SQL avec Upsert
         upsert_sql = """
         INSERT INTO offres_emploi (
-            id_france_travail, titre, description, competences, languages, 
-            contract, diplome_requis, education, localisation, salaire_min, 
-            salaire_max, experience_years, source_url, source_platform, company, date_du_poste, embedding
+            id_france_travail, titre, description, competences, languages,
+            contract, diplome_requis, education, localisation, salaire_min,
+            salaire_max, experience_years, source_url, source_platform, company, secteur_activite, date_du_poste, embedding
         ) VALUES %s
-        ON CONFLICT (source_url) 
-        DO UPDATE SET 
+        ON CONFLICT (source_url)
+        DO UPDATE SET
             titre = EXCLUDED.titre,
             description = EXCLUDED.description,
             salaire_min = EXCLUDED.salaire_min,
             salaire_max = EXCLUDED.salaire_max,
-            competences  = EXCLUDED.competences;
+            competences  = EXCLUDED.competences,
+            secteur_activite = EXCLUDED.secteur_activite;
         """
             # embedding = EXCLUDED.embedding;
 
@@ -260,6 +242,7 @@ def load_silver_to_gold():
                 row['source_url'],
                 row['source_platform'],
                 row['company'],
+                row.get('secteur_activite'),
                 row['date_du_poste'],
                 None  # embedding — sera rempli en S5
             )

@@ -1,10 +1,14 @@
+import math
+from collections import Counter
+
 import streamlit as st
 # from airflow_client import airflow
-from scripts.matching_cv import find_best_matches
+from scripts.matching_cv import find_best_matches, get_market_fit_stats
 from styles.dashbord_style import inject_dashboard_style
 from views.sidebar import render_sidebar
 from views.header_board import render_header
 from back_service.cv_parser import extract_cv_text
+from views.offer_card import render_offer_card
 # Radar de compétences : pas encore de backend d'extraction de compétences /
 # calcul d'écart réel, donc désactivé pour l'instant (voir _render_skill_gap_results
 # plus bas, laissé en commentaire pour reprise future).
@@ -19,9 +23,6 @@ def render_matching():
 
     if st.session_state.get("matching_done"):
         _render_matching_results(st.session_state.matched_offers)
-        if st.button("← Lancer une nouvelle analyse", key="restart_matching"):
-            st.session_state.matching_done = False
-            st.rerun()
         return
 
     _render_dropzone()
@@ -60,10 +61,23 @@ def _render_dropzone():
                     _run_matching(cv_text)
 
 
+@st.cache_data(ttl=600, show_spinner=False)
+def _cached_market_fit_stats(cv_text):
+    return get_market_fit_stats(cv_text)
+
+
+def _tension_label(pct):
+    if pct >= 15:
+        return "Profil très demandé"
+    if pct >= 5:
+        return "Demande modérée"
+    return "Profil de niche"
+
+
 def _run_matching(cv_text):
     with st.spinner("Analyse en cours..."):
         try:
-            results = find_best_matches(cv_text, top_n=20)
+            results = find_best_matches(cv_text, top_n=50)
         except Exception as e:
             st.error(f"Erreur lors du matching : {e}")
             return
@@ -71,64 +85,133 @@ def _run_matching(cv_text):
     st.session_state.cv_text = cv_text
     st.session_state.matched_offers = results
     st.session_state.matching_done = True
+    st.session_state.offres_display_count = 20
     st.rerun()
 
 
-def _format_salaire(mn, mx):
-    def valid(v):
-        return v is not None and v >= 0
+def _top_missing_skill(offers):
+    """Compétence manquante la plus demandée parmi les offres sélectionnées —
+    ne compte que missing_skills (pas matched_skills) pour cibler ce qui vaut
+    la peine d'être appris en priorité, plutôt qu'une compétence déjà acquise."""
+    counter = Counter()
+    for offre in offers:
+        counter.update(set(offre["missing_skills"]))
+    if not counter:
+        return None
+    skill, count = counter.most_common(1)[0]
+    return skill, round(100 * count / len(offers))
 
-    mn = mn if valid(mn) else None
-    mx = mx if valid(mx) else None
 
-    def fmt(v):
-        return f"{v / 1000:.0f}k€" if v >= 1000 else f"{v:.0f}€"
-
-    if mn is not None and mx is not None:
-        return f"{fmt(mn)} – {fmt(mx)}"
-    if mn is not None or mx is not None:
-        return fmt(mn if mn is not None else mx)
-    return "Salaire non précisé"
+def _score_ring_svg(pct, size=84, stroke_width=8):
+    """Anneau de progression en SVG pur (stroke-dasharray) plutôt qu'un
+    graphique Altair : c'est un simple indicateur intégré dans une tuile KPI,
+    pas un chart autonome, donc pas besoin de la machinerie Vega-Lite pour
+    ça."""
+    radius = (size - stroke_width) / 2
+    circumference = 2 * math.pi * radius
+    offset = circumference * (1 - pct / 100)
+    center = size / 2
+    # Une seule ligne, sans retour ni indentation : injecté tel quel dans le
+    # f-string appelant, un simple `\n` en tête suffit à casser le bloc HTML
+    # de Markdown (voir dedent() dans tendences.py pour le même piège) — tout
+    # ce qui suit serait alors rendu comme texte brut au lieu d'être interprété.
+    return (
+        f'<div class="sg-ring-wrap"><svg width="{size}" height="{size}" viewBox="0 0 {size} {size}">'
+        f'<circle class="sg-ring-track" cx="{center}" cy="{center}" r="{radius}" fill="none" stroke-width="{stroke_width}"/>'
+        f'<circle class="sg-ring-progress" cx="{center}" cy="{center}" r="{radius}" fill="none" stroke-width="{stroke_width}" '
+        f'stroke-linecap="round" stroke-dasharray="{circumference:.2f}" stroke-dashoffset="{offset:.2f}" '
+        f'transform="rotate(-90 {center} {center})"/>'
+        f'<text class="sg-ring-value" x="{center}" y="{center}" text-anchor="middle" dominant-baseline="central">{pct}%</text>'
+        f'</svg></div>'
+    )
 
 
 def _render_matching_results(offers):
-    st.markdown('<div class="sg-section-title">Résultat de l\'analyse</div>', unsafe_allow_html=True)
+    col_title, col_restart = st.columns([4, 1])
+    with col_title:
+        st.markdown('<div class="sg-section-title">Résultat de l\'analyse</div>', unsafe_allow_html=True)
+    with col_restart:
+        if st.button("↻ Recommencer l'analyse", key="restart_matching", use_container_width=True):
+            st.session_state.matching_done = False
+            st.rerun()
 
     if not offers:
         st.info("Aucune offre correspondante trouvée pour le moment. Réessayez plus tard, de nouvelles offres sont ajoutées régulièrement.")
         return
 
     top_score = round(offers[0]["score"] * 100)
-    st.markdown('<div class="sg-kpi-row">', unsafe_allow_html=True)
+    # round() plutôt que comparer le score brut à 0.70 : sinon une offre à
+    # 69.6% s'affiche "70%" dans l'anneau juste à côté mais ne compte pas
+    # comme compatible, ce qui a l'air incohérent pour l'utilisateur.
+    compatible_count = sum(1 for o in offers if round(o["score"] * 100) >= 70)
+    top_missing = _top_missing_skill(offers)
+    # "Taux d'éligibilité immédiate" désactivé pour l'instant (voir demande) —
+    # laissé en commentaire pour reprise future plutôt que supprimé. Ça reste
+    # la seule utilisation de market_fit, donc son calcul (requête marché +
+    # ré-encodage du CV) est aussi commenté pour ne pas tourner pour rien.
+    # market_fit = _cached_market_fit_stats(st.session_state.cv_text)
+
+    top_missing_tile = ""
+    if top_missing:
+        skill_name, skill_pct = top_missing
+        top_missing_tile = f"""
+        <div class="sg-kpi sg-kpi-center">
+            <div class="sg-kpi-label">Compétence à acquérir en priorité</div>
+            <div class="sg-kpi-value-danger">{skill_name}</div>
+            <div class="sg-kpi-sub">demandée dans {skill_pct}% des offres</div>
+        </div>"""
+
     st.markdown(f"""
-        <div class="sg-kpi">
-            <div class="sg-kpi-label">Offres correspondantes</div>
-            <div class="sg-kpi-value">{len(offers)}</div>
-        </div>
-        <div class="sg-kpi">
-            <div class="sg-kpi-label">Meilleure correspondance</div>
-            <div class="sg-kpi-value">{top_score}%</div>
+        <div class="sg-kpi-row">
+            <div class="sg-kpi">
+                <div class="sg-kpi-label">Meilleure correspondance</div>
+                {_score_ring_svg(top_score)}
+                <div class="sg-kpi-sub sg-kpi-sub-center">avec une offre du marché</div>
+            </div>
+            <div class="sg-kpi sg-kpi-center">
+                <div class="sg-kpi-label">Offres compatibles</div>
+                <div class="sg-kpi-value">{compatible_count}</div>
+                <div class="sg-kpi-sub">score de correspondance &ge; 70%</div>
+            </div>{top_missing_tile}
         </div>
     """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+
+    # "Taux d'éligibilité immédiate" désactivé pour l'instant (voir demande) —
+    # laissé en commentaire pour reprise future plutôt que supprimé.
+    # st.markdown('<div class="sg-kpi-row">', unsafe_allow_html=True)
+    # st.markdown(f"""
+    #     <div class="sg-kpi">
+    #         <div class="sg-kpi-label">Taux d'éligibilité immédiate</div>
+    #         <div class="sg-kpi-value">{market_fit['eligibility_rate']}%</div>
+    #         <div class="sg-kpi-sub">des offres du marché avec un score &gt; 70%</div>
+    #     </div>
+    # """, unsafe_allow_html=True)
+    # "Indice de tension du profil" désactivé pour l'instant (voir demande) —
+    # laissé en commentaire pour reprise future plutôt que supprimé.
+    # st.markdown(f"""
+    #     <div class="sg-kpi">
+    #         <div class="sg-kpi-label">Indice de tension du profil</div>
+    #         <div class="sg-kpi-value">{tension_pct}%</div>
+    #         <div class="sg-kpi-sub">{_tension_label(tension_pct)}</div>
+    #     </div>
+    # """, unsafe_allow_html=True)
+    # st.markdown('</div>', unsafe_allow_html=True)
+
+    # KPI "Distance technologique" désactivé pour l'instant (voir demande) —
+    # laissé en commentaire pour reprise future plutôt que supprimé.
+    # st.markdown('<div class="sg-kpi-row">', unsafe_allow_html=True)
+    # st.markdown(f"""
+    #     <div class="sg-kpi">
+    #         <div class="sg-kpi-label">Distance technologique</div>
+    #         <div class="sg-kpi-value">{market_fit['avg_similarity']:.2f}</div>
+    #         <div class="sg-kpi-sub">similarité moyenne CV / marché (1 = alignement parfait)</div>
+    #     </div>
+    # """, unsafe_allow_html=True)
+    # st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('<div class="sg-section-title">Offres les plus proches de votre profil</div>', unsafe_allow_html=True)
     for offre in offers[:5]:
-        url = offre.get("source_url")
-        tag_open = f'<a class="sg-offer-card" href="{url}" target="_blank" rel="noopener noreferrer">' if url else '<div class="sg-offer-card">'
-        tag_close = "</a>" if url else "</div>"
-        st.markdown(f"""
-        {tag_open}
-            <div>
-                <p class="sg-offer-title">{offre['titre']}</p>
-                <p class="sg-offer-meta">{offre['company']} · {offre.get('localisation') or 'Lieu non précisé'} · {offre.get('contract') or 'Contrat non précisé'} · {_format_salaire(offre.get('salaire_min'), offre.get('salaire_max'))}</p>
-            </div>
-            <div>
-                <div class="sg-offer-score">{round(offre['score'] * 100)}%</div>
-                <div class="sg-offer-score-label">Correspondance</div>
-            </div>
-        {tag_close}
-        """, unsafe_allow_html=True)
+        render_offer_card(offre)
 
     if st.button("Voir toutes les offres →", key="go_to_offres"):
         st.session_state.page = "offres"
