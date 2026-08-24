@@ -267,10 +267,14 @@ def _render_matching_results(offers):
     # """, unsafe_allow_html=True)
     # st.markdown('</div>', unsafe_allow_html=True)
 
+    _render_priority_learning(offers)
+
     st.markdown('<div class="sg-section-title">Offres les plus proches de votre profil</div>', unsafe_allow_html=True)
-    for offre in offers[:5]:
+    for offre in offers[:3]:
         render_offer_card(offre)
 
     if st.button("Voir toutes les offres →", key="go_to_offres"):
         st.session_state.page = "offres"
         st.rerun()
+
+    _render_recommendation_banner(offers)
