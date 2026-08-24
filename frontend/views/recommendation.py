@@ -61,10 +61,17 @@ def render_recommendation():
 
         skill_advice = advice.get(skill)
         if skill_advice:
+            projet = skill_advice.get("projet", {})
+            etapes_html = "".join(
+                f'<p class="sg-training-meta">{i}. {etape}</p>'
+                for i, etape in enumerate(projet.get("etapes", []), start=1)
+            )
             st.markdown(f"""
             <div class="sg-training-card">
-                <p class="sg-training-title">Projet suggéré — {skill}</p>
-                <p class="sg-training-meta">{skill_advice.get('projet_suggere', '')}</p>
-                <p class="sg-training-meta">{skill_advice.get('conseil', '')}</p>
+                <p class="sg-training-title">{projet.get('titre', f'Projet suggéré — {skill}')}</p>
+                <p class="sg-training-meta">Pour pratiquer : {skill}</p>
+                {etapes_html}
+                <p class="sg-training-meta">Livrable : {projet.get('livrable', '')}</p>
+                <p class="sg-training-meta">Conseil : {skill_advice.get('conseil', '')}</p>
             </div>
             """, unsafe_allow_html=True)
