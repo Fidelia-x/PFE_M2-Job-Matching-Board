@@ -12,7 +12,6 @@ from views.offer_card import render_offer_card
 # calcul d'écart réel, donc désactivé pour l'instant (voir _render_skill_gap_results
 # plus bas, laissé en commentaire pour reprise future).
 # from views.svg_charts import radar_chart_svg, gauge_svg
-# from views.mock_data import get_mock_skill_gap
 
 
 def render_matching():
