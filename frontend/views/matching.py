@@ -1,9 +1,8 @@
 import math
-from collections import Counter
 
 import streamlit as st
 # from airflow_client import airflow
-from scripts.matching_cv import find_best_matches, get_market_fit_stats
+from scripts.matching_cv import find_best_matches, get_market_fit_stats, rank_missing_skills
 from styles.dashbord_style import inject_dashboard_style
 from views.sidebar import render_sidebar
 from views.header_board import render_header
@@ -90,16 +89,8 @@ def _run_matching(cv_text):
 
 
 def _top_missing_skill(offers):
-    """Compétence manquante la plus demandée parmi les offres sélectionnées —
-    ne compte que missing_skills (pas matched_skills) pour cibler ce qui vaut
-    la peine d'être appris en priorité, plutôt qu'une compétence déjà acquise."""
-    counter = Counter()
-    for offre in offers:
-        counter.update(set(offre["missing_skills"]))
-    if not counter:
-        return None
-    skill, count = counter.most_common(1)[0]
-    return skill, round(100 * count / len(offers))
+    ranked = rank_missing_skills(offers)
+    return ranked[0] if ranked else None
 
 
 def _score_ring_svg(pct, size=84, stroke_width=8):

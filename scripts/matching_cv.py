@@ -1,6 +1,7 @@
 import psycopg2
 from pgvector.psycopg2 import register_vector
 from sentence_transformers import SentenceTransformer
+from collections import Counter
 import os
 
 from scripts.skills_reference import extract_skills
@@ -84,6 +85,21 @@ def find_best_matches(cv_text, top_n=3):
             "score": round(r[9], 3),
         })
     return matches
+
+
+def rank_missing_skills(offers):
+    """Classe les compétences manquantes par fréquence parmi les offres
+    matchées — ne compte que missing_skills (pas matched_skills), pour
+    cibler ce qui vaut la peine d'être appris en priorité plutôt qu'une
+    compétence déjà acquise. Retourne une liste de (skill, pct) triée par
+    fréquence décroissante, pct étant le pourcentage d'offres où cette
+    compétence manque."""
+    if not offers:
+        return []
+    counter = Counter()
+    for offre in offers:
+        counter.update(set(offre["missing_skills"]))
+    return [(skill, round(100 * count / len(offers))) for skill, count in counter.most_common()]
 
 
 def get_market_fit_stats(cv_text, eligibility_threshold=0.70):
