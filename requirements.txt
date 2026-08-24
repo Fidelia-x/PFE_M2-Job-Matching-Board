@@ -17,3 +17,4 @@ bcrypt
 pgvector
 pdfplumber
 python-docx
+pytest
