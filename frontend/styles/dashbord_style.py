@@ -672,6 +672,13 @@ a.sg-offer-card:hover {
     font-size: 0.82rem;
     color: var(--text-lo);
 }
+.sg-training-title a {
+    color: inherit;
+    text-decoration: none;
+}
+.sg-training-title a:hover {
+    text-decoration: underline;
+}
 
 /* Barres de plage salariale */
 .sg-range-row {
