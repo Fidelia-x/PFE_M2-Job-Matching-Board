@@ -23,9 +23,9 @@ if offre:
     # 5. Tenter l'insertion
     cur.execute("UPDATE offres_emploi SET embedding = %s WHERE id_offres_emploi = %s", (vecteur, id_offre))
     conn.commit()
-    print("✅ Test réussi : La ligne a bien été mise à jour dans PostgreSQL.")
+    print("Test réussi : La ligne a bien été mise à jour dans PostgreSQL.")
 else:
-    print("❌ Aucune offre trouvée dans la table.")
+    print("Aucune offre trouvée dans la table.")
 
 cur.close()
 conn.close()

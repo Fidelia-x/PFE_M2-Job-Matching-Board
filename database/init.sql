@@ -21,10 +21,8 @@ CREATE TABLE IF NOT EXISTS offres_emploi (
     company TEXT NOT NULL,
     secteur_activite TEXT,
     date_du_poste TIMESTAMP DEFAULT NOW(),
-
     embedding vector(384)    -- La colonne IA
 );
-
 CREATE UNIQUE INDEX idx_unique_source_url ON offres_emploi (source_url);
 
 CREATE TABLE cv_candidats (
@@ -39,6 +37,5 @@ CREATE TABLE cv_candidats (
     certifications TEXT[],
     languages TEXT[],
     date_de_lanalyse TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
     cv_embedding vector(384)
 );

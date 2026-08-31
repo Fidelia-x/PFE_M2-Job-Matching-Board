@@ -153,25 +153,3 @@ def get_market_fit_stats(cv_text, eligibility_threshold=0.70):
         "eligibility_rate": round(100 * eligible / total),
         "avg_similarity": round(float(avg_similarity), 3) if avg_similarity is not None else 0.0,
     }
-
-
-# from mistralai.client import MistralClient
-
-# def analyze_gap(cv_text, job_description):
-#     client = MistralClient(api_key="TA_CLE_API_MISTRAL")
-    
-#     prompt = f"""
-#     Analyse ce CV et cette offre d'emploi.
-#     CV: {cv_text}
-#     Offre: {job_description}
-    
-#     Réponds sous ce format JSON strict :
-#     {{
-#         "competences_manquantes": ["comp1", "comp2"],
-#         "conseil": "Texte court",
-#         "projet_suggere": "Nom d'un projet pour apprendre ces skills"
-#     }}
-#     """
-    
-#     response = client.chat(model="mistral-medium", messages=[{"role": "user", "content": prompt}])
-#     return response.choices[0].message.content
