@@ -42,21 +42,16 @@ def get_access_token():
     response = requests.post(url, data=data)
 
     if response.status_code != 200:
-        print(f"❌ Erreur {response.status_code}: {response.text}")
+        print(f" Erreur {response.status_code}: {response.text}")
         
     response.raise_for_status()
     token_data = response.json()
-    print(f"✅ Token valide pour {token_data.get('expires_in', '?')} secondes")
+    print(f" Token valide pour {token_data.get('expires_in', '?')} secondes")
     return token_data['access_token']
 
 
 # COLLECTE AVEC PAGINATION(page)
 def recup_all_pages(headers, job):
-    """
-    Récupère toutes les pages de résultats pour un métier donné.
-    FranceTravail renvoie max 150 offres par requête — on pagine automatiquement.
-    Toute la France — pas de filtre géographique.
-    """
     all_offres = []
     start = 0
     page_size = 149
@@ -83,7 +78,7 @@ def recup_all_pages(headers, job):
             start += page_size
 
         else:
-            print(f"❌ Erreur {response.status_code} pour : {job}")
+            print(f"Erreur {response.status_code} pour : {job}")
             break
 
     return all_offres
@@ -109,7 +104,7 @@ def upload_to_minio(bucket, filename, offres, metadata):
         "offres":    offres
     }
     data_str = json.dumps(payload, ensure_ascii=False)
-    print(f"🚀 Upload direct en mémoire de {filename} dans le bucket '{bucket}'...")
+    print(f"Upload direct en mémoire de {filename} dans le bucket '{bucket}'...")
 
     hook.load_string(
         string_data = data_str,
@@ -117,7 +112,7 @@ def upload_to_minio(bucket, filename, offres, metadata):
         bucket_name = bucket,
         replace     = True
     )
-    print(f"✅ Uploadé : {filename} ({len(offres)} offres stockées)")
+    print(f"Uploadé : {filename} ({len(offres)} offres stockées)")
     return True
 
 # RAPPORT DE COLLECTE
@@ -140,13 +135,13 @@ def generer_rapport(stats, date):
     )
 
     print(f"\n{'='*50}")
-    print(f"📊 Collecte terminée — {rapport['total_offres']} offres au total")
-    print(f"📁 Rapport : bronze/rapports/france_travail_{date}.json")
+    print(f"Collecte terminée — {rapport['total_offres']} offres au total")
+    print(f"Rapport : bronze/rapports/france_travail_{date}.json")
     print(f"{'='*50}")
 
 
 def main():
-    print("🚀 Démarrage de la collecte France Travail...\n")
+    print("Démarrage de la collecte France Travail...\n")
 
     # 2. Récupérer le token OAuth2
     token   = get_access_token()
@@ -180,7 +175,7 @@ def main():
                 "fichier":   filename
             })
         else:
-            print(f"⚠️  Aucune offre trouvée pour : {job}")
+            print(f"Aucune offre trouvée pour : {job}")
 
     # 4. Générer le rapport
     generer_rapport(stats, date)

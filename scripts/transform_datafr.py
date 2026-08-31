@@ -27,36 +27,6 @@ def extract_salary(salary_data):
         return numbers[0], numbers[0]
     return 0.0, 0.0
 
-# def transformer_data(json_data):
-#     df = pd.DataFrame(json_data.get('offres', []))
-#     df_clean = pd.DataFrame()
-
-#     # Mapping complet
-#     df_clean['id_france_travail'] = df['id']
-#     df_clean['titre'] = df['intitule']
-#     df_clean['description'] = df['description']
-#     # Gestion des tableaux (ARRAY dans Postgres)
-#     df_clean['competences'] = df['competences'].apply(lambda x: [item['libelle'] for item in x] if isinstance(x, list) else [])
-#     df_clean['languages'] = df['langues'].apply(lambda x: [item['libelle'] for item in x] if isinstance(x, list) else [])
-    
-#     df_clean['contract'] = df['typeContratLibelle']
-#     df_clean['diplome_requis'] = df['qualificationLibelle']
-#     df_clean['education'] = df['formations'].apply(lambda x: x[0].get('niveauLibelle') if isinstance(x, list) and len(x) > 0 else None)
-#     df_clean['localisation'] = df['lieuTravail'].apply(lambda x: x.get('libelle') if isinstance(x, dict) else None)
-    
-#     # Salaires
-#     salaires = df['salaire'].apply(extract_salary)
-#     df_clean['salaire_min'] = [s[0] for s in salaires]
-#     df_clean['salaire_max'] = [s[1] for s in salaires]
-    
-#     df_clean['experience_years'] = df['experienceExige'].map({'D': 0, 'E': 3}).fillna(1)
-#     df_clean['source_url'] = df['origineOffre'].apply(lambda x: x.get('urlOrigine') if isinstance(x, dict) else None)
-#     df_clean['source_platform'] = 'France Travail'
-#     df_clean['company'] = df['entreprise'].apply(lambda x: x.get('nom', 'N/A') if isinstance(x, dict) else 'N/A')
-#     df_clean['date_du_poste'] = pd.to_datetime(df['dateCreation'])
-    
-#     return df_clean
-
 def transformer_data(json_data):
     # On récupère la liste des offres
     offres = json_data.get('offres', [])
@@ -132,7 +102,7 @@ def save_to_silver(df, minio_client, bucket_name, object_name):
         data=buffer,
         length=buffer.getbuffer().nbytes
     )
-    print(f"✅ Fichier sauvegardé dans silver : {object_name}")
+    print(f"Fichier sauvegardé dans silver : {object_name}")
 
 def transform_and_save_all():
     hook = S3Hook(aws_conn_id=CONN_ID)
@@ -150,10 +120,10 @@ def transform_and_save_all():
         
         # 2. VÉRIFICATION : Le fichier existe-t-il déjà dans Silver ?
         if hook.check_for_key(key=silver_path, bucket_name="silver"):
-            print(f"⏩ Déjà traité : {silver_path}, on passe.")
+            print(f"Déjà traité : {silver_path}, on passe.")
             continue
             
-        print(f"🔄 Transformation de {key}...")
+        print(f"Transformation de {key}...")
         
         # 3. Télécharger, transformer et sauvegarder
         obj = hook.get_key(key, bucket_name="bronze")
@@ -173,4 +143,4 @@ def transform_and_save_all():
             bucket_name="silver",
             replace=True
         )
-        print(f"✅ Fichier sauvegardé : {silver_path}")
+        print(f"Fichier sauvegardé : {silver_path}")

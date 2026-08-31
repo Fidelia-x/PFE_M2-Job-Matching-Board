@@ -89,63 +89,6 @@ def clean_education_level(text):
     else:
         return 'Non précisé'
 
-# def clean_company(name):
-#     if not name or pd.isna(name):
-#         return "Non précisée"
-    
-#     # 1. On enlève les espaces inutiles au début et à la fin
-#     name = str(name).strip()
-    
-#     # 2. On met le nom en format "Title Case" pour que ça soit propre
-#     # (ex: "SNCF" reste "SNCF", "google" devient "Google")
-#     return name.title() if len(name) > 4 else name.upper()
-
-# def load_silver_to_gold():
-#     hook = S3Hook(aws_conn_id=CONN_ID)
-#     # 2. Connexion Postgres (pour écrire dans la base)
-#     pg_hook = PostgresHook(postgres_conn_id="postgres_default")
-#     init_database(pg_hook)
-
-#     # Lister les fichiers Parquet dans Silver
-#     keys = hook.list_keys(bucket_name="silver", prefix="france_travail/")
-    
-#     for key in keys:
-#         # Lire le Parquet
-#         obj = hook.get_key(key, bucket_name="silver")
-#         df = pd.read_parquet(io.BytesIO(obj.get()['Body'].read()))
-
-#         df['competences'] = df['competences'].apply(format_array)
-#         df['languages'] = df['languages'].apply(format_array)
-        
-#         # Assure-toi que les valeurs NaN ne bloquent pas
-#         df = df.where(pd.notnull(df), None)
-
-#         # Préparer les données pour l'insertion
-#         # Note: on utilise 'execute_values' pour aller très vite
-#         rows = df.values.tolist()
-        
-#         insert_query = """
-#             INSERT INTO offres_emploi (
-#                 titre, description, competences, languages, contract, 
-#                 diplome_requis, education, localisation, salaire_min, 
-#                 salaire_max, experience_years, source_url, source_platform, 
-#                 company, date_du_poste
-#             ) VALUES %s
-#             ON CONFLICT (source_url) DO NOTHING;
-#         """
-        
-#         # pg_hook.insert_rows est plus simple, mais execute_values est plus rapide
-#         # Ici on utilise une méthode simple compatible avec le hook
-#         pg_hook.insert_rows(
-#             table="offres_emploi",
-#             rows=rows,
-#             target_fields=[
-#                 'titre', 'description', 'competences', 'languages', 'contract', 'diplome_requis', 'education', 'localisation', 'salaire_min',
-#                 'salaire_max','experience_years', 'source_url', 'source_platform', 'company', 'date_du_poste'
-#             ]
-#         )
-#         print(f"✅ Données de {key} chargées dans la table 'offres_emploi'")
-
 def load_silver_to_gold():
     hook = S3Hook(aws_conn_id=CONN_ID)
     pg_hook = PostgresHook(postgres_conn_id="postgres_default")
@@ -203,27 +146,6 @@ def load_silver_to_gold():
             competences  = EXCLUDED.competences,
             secteur_activite = EXCLUDED.secteur_activite;
         """
-            # embedding = EXCLUDED.embedding;
-
-        # Exécution de l'Upsert ligne par ligne
-        # En Python, l'underscore est une convention pour dire : "Je sais que cette valeur existe, 
-        # mais je ne vais pas l'utiliser". Ici, iterrows() renvoie toujours deux choses (l'index et la ligne). 
-        # Comme tu n'as pas besoin du numéro de la ligne (l'index) pour faire ton insertion, tu le stockes dans _ pour dire "ignore-le".
-        
-        # for _, row in df.iterrows():
-        #     params = (
-        #         row['id_france_travail'], row['titre'], row['description'], 
-        #         row['competences'], row['languages'], row['contract'], 
-        #         row['diplome_requis'], row['education'], row['localisation'], 
-        #         row['salaire_min'], row['salaire_max'], row['experience_years'], 
-        #         row['source_url'], row['source_platform'], row['company']
-        #         # row['embedding']
-        #     )
-
-        #     pg_hook.run(upsert_sql, parameters=params)
-            
-        # print(f"✅ Données de {key} chargées avec succès (Upsert appliqué)")
-
     # Prépare les tuples pour execute_values (beaucoup plus rapide)
         rows = [
             (

@@ -42,4 +42,4 @@ def vectorize_missing_offers():
     conn.commit()
     cur.close()
     conn.close()
-    print("✅ Vectorisation terminée.")
+    print("Vectorisation terminée.")

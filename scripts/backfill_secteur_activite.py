@@ -13,12 +13,8 @@ import io
 import json
 import os
 import sys
-
 import psycopg2
 
-# La console Windows par défaut (cp1252) ne sait pas encoder les emojis des
-# print() ci-dessous — sans ça le script crashe juste avant d'afficher le
-# résultat, alors que le traitement lui-même est terminé.
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
 from minio import Minio
@@ -62,7 +58,7 @@ def collect_sector_by_offer_id(minio_client):
             if offer_id and secteur:
                 sectors[offer_id] = secteur
 
-    print(f"📂 {n_files} fichiers bronze lus, {len(sectors)} secteurs identifiés")
+    print(f"{n_files} fichiers bronze lus, {len(sectors)} secteurs identifiés")
     return sectors
 
 
@@ -88,7 +84,7 @@ def apply_backfill(sectors):
         updated = cur.rowcount
         conn.commit()
         cur.close()
-        print(f"✅ {updated} offres mises à jour avec leur secteur d'activité")
+        print(f"{updated} offres mises à jour avec leur secteur d'activité")
     finally:
         conn.close()
 
