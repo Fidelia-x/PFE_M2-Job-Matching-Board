@@ -4,6 +4,16 @@ import os
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+# Sur Streamlit Cloud, la config (POSTGRES_HOST, MISTRAL_API_KEY, ...) est
+# saisie dans les "Secrets" de l'app et exposée via st.secrets, pas via
+# os.environ. On la recopie ici, avant les imports de back_service, car
+# scripts.matching_cv.DB_CONFIG est lu au moment de l'import.
+try:
+    for key, value in st.secrets.items():
+        os.environ.setdefault(key, str(value))
+except Exception:
+    pass
+
 import importlib
 import styles.main_style
 import styles.dashbord_style

@@ -6,14 +6,16 @@ import os
 
 from scripts.skills_reference import extract_skills
 
-# Configuration (à adapter selon tes variables d'environnement)
+# Valeurs par défaut alignées sur docker-compose.yml (réseau Docker local) ;
+# surchargeables via variables d'environnement pour pointer vers une base
+# Postgres accessible publiquement (ex. déploiement Streamlit Cloud, qui n'a
+# pas accès au conteneur "postgres" local).
 DB_CONFIG = {
-    "dbname": "job_matching",
-    "user": "user",
-    "password": "password",
-    # "host": "localhost",
-    "host": "postgres",
-    "port": "5432"
+    "dbname": os.environ.get("POSTGRES_DB", "job_matching"),
+    "user": os.environ.get("POSTGRES_USER", "user"),
+    "password": os.environ.get("POSTGRES_PASSWORD", "password"),
+    "host": os.environ.get("POSTGRES_HOST", "postgres"),
+    "port": os.environ.get("POSTGRES_PORT", "5432"),
 }
 
 def get_db_connection():
