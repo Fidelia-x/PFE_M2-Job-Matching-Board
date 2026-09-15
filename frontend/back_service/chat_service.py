@@ -1,3 +1,5 @@
+import sys
+
 from back_service.mistral_client import get_client
 
 SYSTEM_PROMPT = """Tu es l'assistant IA de SkillGap, une plateforme d'aide à la recherche d'emploi dans la data (matching CV, offres, tendances du marché, recommandations de formations).
@@ -33,6 +35,7 @@ def stream_chat_reply(messages, profile_context=None):
     l'appelant doit pouvoir dégrader proprement plutôt que planter."""
     client = get_client()
     if client is None:
+        print("[chat_service] MISTRAL_API_KEY absente ou vide — get_client() a renvoyé None.", file=sys.stderr)
         return None
 
     system_content = SYSTEM_PROMPT
@@ -44,7 +47,8 @@ def stream_chat_reply(messages, profile_context=None):
 
     try:
         stream = client.chat.stream(model="mistral-small-latest", messages=full_messages)
-    except Exception:
+    except Exception as e:
+        print(f"[chat_service] Échec de l'appel à l'API Mistral : {e!r}", file=sys.stderr)
         return None
 
     def _generate():
@@ -53,7 +57,8 @@ def stream_chat_reply(messages, profile_context=None):
                 delta = event.data.choices[0].delta.content
                 if delta:
                     yield delta
-        except Exception:
+        except Exception as e:
+            print(f"[chat_service] Stream interrompu : {e!r}", file=sys.stderr)
             yield "\n\n*(La réponse a été interrompue — problème de connexion à l'assistant.)*"
 
     return _generate()
