@@ -16,6 +16,7 @@ DB_CONFIG = {
     "password": os.environ.get("POSTGRES_PASSWORD", "password"),
     "host": os.environ.get("POSTGRES_HOST", "postgres"),
     "port": os.environ.get("POSTGRES_PORT", "5432"),
+    "sslmode": os.environ.get("POSTGRES_SSLMODE", "prefer"),
 }
 
 def get_db_connection():
