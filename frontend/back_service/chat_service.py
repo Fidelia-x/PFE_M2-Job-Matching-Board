@@ -1,6 +1,6 @@
 import sys
 
-from back_service.mistral_client import get_client
+from back_service.llm_client import get_client
 
 SYSTEM_PROMPT = """Tu es l'assistant IA de SkillGap, une plateforme d'aide à la recherche d'emploi dans la data (matching CV, offres, tendances du marché, recommandations de formations).
 
@@ -31,11 +31,11 @@ def stream_chat_reply(messages, profile_context=None):
     dans le system prompt pour ancrer les réponses sur son profil réel.
 
     Retourne un générateur de morceaux de texte à streamer, ou None si
-    Mistral n'est pas joignable (pas de clé, quota dépassé, erreur réseau) —
+    Groq n'est pas joignable (pas de clé, quota dépassé, erreur réseau) —
     l'appelant doit pouvoir dégrader proprement plutôt que planter."""
     client = get_client()
     if client is None:
-        print("[chat_service] MISTRAL_API_KEY absente ou vide — get_client() a renvoyé None.", file=sys.stderr)
+        print("[chat_service] GROQ_API_KEY absente ou vide — get_client() a renvoyé None.", file=sys.stderr)
         return None
 
     system_content = SYSTEM_PROMPT
@@ -46,17 +46,22 @@ def stream_chat_reply(messages, profile_context=None):
     full_messages = [{"role": "system", "content": system_content}] + messages
 
     try:
-        stream = client.chat.stream(model="mistral-small-latest", messages=full_messages)
+        stream = client.chat.completions.create(model="openai/gpt-oss-20b", messages=full_messages, stream=True)
+        # stream = client.chat.stream(model="mistral-small-latest", messages=full_messages)
     except Exception as e:
-        print(f"[chat_service] Échec de l'appel à l'API Mistral : {e!r}", file=sys.stderr)
+        print(f"[chat_service] Échec de l'appel à l'API Groq : {e!r}", file=sys.stderr)
         return None
 
     def _generate():
         try:
-            for event in stream:
-                delta = event.data.choices[0].delta.content
+            for chunk in stream:
+                delta = chunk.choices[0].delta.content
                 if delta:
                     yield delta
+                # for event in stream:
+                #     delta = event.data.choices[0].delta.content
+                #     if delta:
+                #         yield delta
         except Exception as e:
             print(f"[chat_service] Stream interrompu : {e!r}", file=sys.stderr)
             yield "\n\n*(La réponse a été interrompue — problème de connexion à l'assistant.)*"

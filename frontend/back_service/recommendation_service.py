@@ -1,11 +1,11 @@
 import json
 
-from back_service.mistral_client import get_client
+from back_service.llm_client import get_client
 
 
 def get_skill_advice(missing_skills):
     """Pour une liste de compétences manquantes (labels, jamais le texte brut
-    du CV — on n'envoie à Mistral que ce qui est nécessaire), génère un
+    du CV — on n'envoie au LLM que ce qui est nécessaire), génère un
     conseil court et un projet détaillé (titre, étapes, livrable) par
     compétence.
 
@@ -40,16 +40,21 @@ Réponds uniquement avec un JSON strict de cette forme, sans texte autour :
 {{"NomCompetence": {{"conseil": "...", "projet": {{"titre": "...", "etapes": ["...", "...", "..."], "livrable": "..."}}}}}}"""
 
     try:
-        response = client.chat.complete(
-            model="mistral-small-latest",
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-20b",
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"},
         )
+        # response = client.chat.complete(
+        #     model="mistral-small-latest",
+        #     messages=[{"role": "user", "content": prompt}],
+        #     response_format={"type": "json_object"},
+        # )
         raw = json.loads(response.choices[0].message.content)
     except Exception:
         return {}
 
-    # Mistral ne réécrit pas toujours la compétence avec exactement la même
+    # Le LLM ne réécrit pas toujours la compétence avec exactement la même
     # casse qu'en entrée (ex. "Sql" envoyé, "SQL" reçu) — on retrouve la
     # correspondance insensible à la casse et on reclé sur le label exact
     # attendu par l'appelant, sinon .get(skill) raterait silencieusement.

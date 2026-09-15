@@ -8,4 +8,5 @@ python-dotenv
 sentence-transformers
 pdfplumber
 python-docx
-mistralai==2.9.4
+groq
+# mistralai==2.9.4

@@ -2,7 +2,7 @@ import io
 import pdfplumber
 from docx import Document
 
-from back_service.mistral_client import get_client
+from back_service.llm_client import get_client
 
 
 def extract_text_from_pdf(file_bytes):
@@ -50,7 +50,7 @@ def extract_target_role(cv_text):
     Tronque à 4000 caractères : l'intitulé/l'objectif visé se trouve presque
     toujours dans l'en-tête du CV, pas besoin d'envoyer le document entier.
 
-    Retourne l'intitulé (str) ou None si absent du texte ou si Mistral n'est
+    Retourne l'intitulé (str) ou None si absent du texte ou si Groq n'est
     pas joignable."""
     client = get_client()
     if client is None:
@@ -65,7 +65,8 @@ Quel est l'intitulé du poste visé par ce candidat, tel qu'il apparaît explici
 Réponds uniquement par l'intitulé du poste (2 à 4 mots), sans phrase autour. Si aucun poste visé n'est indiqué explicitement dans le texte, réponds exactement : Non précisé"""
 
     try:
-        response = client.chat.complete(model="mistral-small-latest", messages=[{"role": "user", "content": prompt}])
+        response = client.chat.completions.create(model="openai/gpt-oss-20b", messages=[{"role": "user", "content": prompt}])
+        # response = client.chat.complete(model="mistral-small-latest", messages=[{"role": "user", "content": prompt}])
         role = response.choices[0].message.content.strip()
     except Exception:
         return None
