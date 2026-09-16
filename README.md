@@ -3,6 +3,8 @@
 
 Ce projet est une plateforme de **Job Matching** basée sur l'intelligence artificielle. Elle permet aux candidats d'analyser leurs CV, d'identifier leurs lacunes en compétences par rapport au marché du travail et de trouver les offres qui leur correspondent le mieux.
 
+🔗 **Démo en ligne :** [pfem2-job-matching-board.streamlit.app](https://pfem2-job-matching-board.streamlit.app/)
+
 ## 🛠 Architecture Technique
 Le projet repose sur une architecture conteneurisée avec **Docker** :
 
@@ -94,6 +96,7 @@ pytest scripts/test_matching_helpers.py -v
 
 - ~~Recommandations de formations~~ — fait : catalogue vérifié + génération de projets par IA.
 - ~~Assistant de carrière (Chatbot IA)~~ — fait : conversationnel, ancré sur le profil, cadrage souple. Reste en mémoire de session uniquement (pas encore persisté en base pour reprendre une conversation après déconnexion).
+- ~~Déploiement production (frontend + base de données)~~ — fait, manuellement : voir [🌐 Déploiement](#-déploiement). Le backend FastAPI et le pipeline Airflow restent locaux (non déployés).
 
 ### Priorité 1 — Produit coeur (à livrer en premier)
 
@@ -113,10 +116,39 @@ pytest scripts/test_matching_helpers.py -v
 - Étendre la couverture de tests unitaires au-delà de la logique de classement des écarts.
 - CI (lancer les tests automatiquement sur chaque push).
 
-4. **Monitoring & déploiement production**
+4. **Monitoring & automatisation du déploiement**
 
 - Logs centralisés, health checks, sauvegardes de la base.
-- Déploiement CI/CD (ex : GitHub Actions, Render/Railway/VM/Kubernetes).
+- CI/CD réel (ex : GitHub Actions déclenchant tests + déploiement automatique) — le déploiement actuel est manuel, seul Streamlit Cloud redéploie automatiquement sur push (sans étape de tests avant).
+- Déploiement hébergé du pipeline Airflow (aujourd'hui local uniquement, voir [🌐 Déploiement](#-déploiement)).
+
+---
+
+## 🌐 Déploiement
+
+Le frontend et la base de données sont déployés en production ; le backend FastAPI et le pipeline Airflow restent locaux.
+
+| Composant | Statut | Où / comment |
+|---|---|---|
+| Frontend (Streamlit) | ✅ Déployé | [pfem2-job-matching-board.streamlit.app](https://pfem2-job-matching-board.streamlit.app/) — redéploiement automatique à chaque push sur `main` |
+| Base de données | ✅ Déployée | PostgreSQL hébergé sur [Supabase](https://supabase.com), extension `pgvector` activée |
+| Assistant IA | ✅ Déployé | [Groq](https://console.groq.com) (`openai/gpt-oss-20b`) — bascule depuis Mistral, dont le compte n'avait pas de moyen de paiement configuré (limite de 0 req/min) |
+| Backend FastAPI | ❌ Non déployé | `backend/main.py` ne contient que des routes de santé, non appelées par le frontend |
+| Pipeline Airflow | ❌ Non déployé | Coût d'hébergement disproportionné + scripts couplés aux abstractions Airflow (`Variable`, `S3Hook`, `PostgresHook`) ; exécuté localement, données poussées vers Supabase via `pg_dump`/`psql` |
+
+Détails complets (difficultés rencontrées et solutions) : Chapitres 11 et 12 du mémoire (`memoire/RAPPORT_PFE_v2.docx`).
+
+### Secrets à configurer sur Streamlit Cloud
+
+```toml
+POSTGRES_HOST = "..."
+POSTGRES_PORT = "..."
+POSTGRES_USER = "..."
+POSTGRES_PASSWORD = "..."
+POSTGRES_DB = "..."
+POSTGRES_SSLMODE = "require"
+GROQ_API_KEY = "..."
+```
 
 ---
 
