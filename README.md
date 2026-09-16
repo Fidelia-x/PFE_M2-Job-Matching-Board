@@ -11,6 +11,9 @@ Le projet repose sur une architecture conteneurisée avec **Docker** :
 - **Base de données :** PostgreSQL avec l'extension **pgvector** (pour la recherche sémantique).
 - **Stockage :** MinIO (Gestion des fichiers/CV).
 - **Orchestration :** Apache Airflow (Pipelines de données).
+- **Assistant IA :** Groq (API compatible OpenAI, modèle `openai/gpt-oss-20b`).
+
+> En local, tout tourne via Docker Compose (voir ci-dessous). En production, seuls le frontend et la base de données sont déployés — voir [🌐 Déploiement](#-déploiement).
 
 ## 📋 Prérequis
 
@@ -23,9 +26,14 @@ Copiez le fichier `.env.example` en `.env` et ajustez les valeurs avant de déma
 
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` — accès PostgreSQL
 - `MINIO_USER`, `MINIO_PASSWORD` — accès MinIO
-- `CLIENT_ID`, `CLIENT_SECRET` — variables OAuth (si utilisées)
+- `CLIENT_ID`, `CLIENT_SECRET` — identifiants API France Travail (collecte des offres)
+- `GROQ_API_KEY` — clé API pour l'assistant IA (Groq)
 
 Un fichier d'exemple est fourni: `.env.example`.
+
+En production (Streamlit Community Cloud), la base de données n'étant plus le conteneur Docker local,
+trois variables supplémentaires sont nécessaires (voir [🌐 Déploiement](#-déploiement)) :
+`POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_SSLMODE`.
 
 ## 🚀 Installation & Lancement
 
@@ -75,7 +83,7 @@ pytest scripts/test_matching_helpers.py -v
 - ✅ **Pipeline ETL (Airflow) :** Automatisation de la récupération des offres d'emploi (via API France Travail). Nettoyage et stockage automatisé dans MinIO et des vecteurs en Postgres/pgvector.
 - ✅ **Matching CV :** Analyse sémantique du CV (embeddings + pgvector) contre les offres du marché, avec score de correspondance et détection des compétences manquantes par offre.
 - ✅ **Recommandations de formations :** Catalogue de ~96 compétences (couverture complète du référentiel), chaque lien de formation vérifié manuellement plutôt que généré par IA — pour éviter les liens morts ou les formations inventées. Complété par un projet pratique généré par IA (titre, étapes, livrable) pour chaque compétence manquante.
-- ✅ **Assistant IA (chatbot) :** Agent conversationnel (Mistral) ancré sur le profil réel du candidat (score, écarts de compétences, poste visé extrait automatiquement du CV) — sans jamais transmettre le CV brut aux services externes. Répond aussi aux questions générales sur la carrière et le marché de l'emploi.
+- ✅ **Assistant IA (chatbot) :** Agent conversationnel (Groq, initialement Mistral — voir [🌐 Déploiement](#-déploiement)) ancré sur le profil réel du candidat (score, écarts de compétences, poste visé extrait automatiquement du CV) — sans jamais transmettre le CV brut aux services externes. Répond aussi aux questions générales sur la carrière et le marché de l'emploi.
 - ✅ **Tendances du marché :** Compétences les plus demandées, fourchettes salariales, répartition géographique et sectorielle, calculés sur les données réelles en base.
 - ✅ **Tests unitaires (pytest) :** Couverture de la logique de classement des écarts de compétences (`scripts/test_matching_helpers.py`).
 
