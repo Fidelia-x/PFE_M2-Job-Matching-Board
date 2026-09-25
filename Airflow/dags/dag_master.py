@@ -18,7 +18,8 @@ with DAG(
     description='Chef orchestre pour déclencher les autres dans le bon ordre',
     start_date=datetime(2026, 6, 18),
     schedule_interval='@daily',
-    catchup=False
+    catchup=False,
+    max_active_runs=1,
 ) as dag:
 
         # 1. Scrapping

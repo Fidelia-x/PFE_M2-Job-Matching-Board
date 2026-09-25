@@ -22,7 +22,8 @@ with DAG(
     description='Chargement des donnees de la Silver -> Gold (Postgres) + calcul des vecteurs pour chaque offres',
     start_date=datetime(2026, 6, 1),
     schedule_interval=None,
-    catchup=False
+    catchup=False,
+    max_active_runs=1,  # deux runs concurrents upsertent offres_emploi en parallele -> deadlock Postgres
 ) as dag:
 
     load_task = PythonOperator(

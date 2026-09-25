@@ -21,7 +21,8 @@ with DAG(
     description='Ingestion des donnees (Zone Bronze)',
     start_date=datetime(2026, 6, 1),
     schedule_interval=None,
-    catchup=False
+    catchup=False,
+    max_active_runs=1,
 ) as dag:
 
     task1 = PythonOperator(

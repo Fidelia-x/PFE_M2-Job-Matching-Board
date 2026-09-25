@@ -20,7 +20,8 @@ with DAG(
     description='Pipeline pour la transformation des donnees de la Bronze -> Silver',
     start_date=datetime(2026, 6, 1),
     schedule_interval=None, # On le lance manuellement ou via un autre DAG
-    catchup=False
+    catchup=False,
+    max_active_runs=1,
 ) as dag:
 
     # Tâche unique : scanne Bronze et transforme vers Silver
